@@ -27,6 +27,8 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 - No need to provide the $ku and $rtu information aswell as the availability of claim and rt to settings and get them at setup.
 - Tests.
 
+- Maybe Inherit from the discord.TextChannel or the actual Abstract Class to Channel, to add prefix so it doesn't get passed as another parameter
+
 ## Known Issues
 
 - When someone else claims first it still believes it claimed.
