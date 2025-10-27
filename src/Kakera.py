@@ -3,7 +3,7 @@ from asyncio import sleep
 from discord.errors import NotFound, InvalidData
 from discord.ext import tasks
 
-from .Cooldown import Cooldown
+from .Cooldown import DAY_IN_SECONDS, Cooldown
 
 
 class Kakera:
@@ -14,29 +14,41 @@ class Kakera:
         total: int,
         dk: Cooldown,
     ):
-        self.value: int = value
-        self.cost: int = cost
-        self.total: int = total
-        self.dk: Cooldown = dk
+        self._value: int = value
+        self._cost: int = cost
+        self._total: int = total
+        self._dk: Cooldown = dk
+
+    @property
+    def value(self) -> int:
+        return self._value
+
+    @property
+    def cost(self) -> int:
+        return self._cost
+
+    @property
+    def total(self) -> int:
+        return self._total
 
     def __iadd__(self, n: int) -> None:
-        if (self.value + n) <= self.total:
-            self.value += n
+        if (self._value + n) <= self._total:
+            self._value += n
         else:
-            self.value = self.total
+            self._value = self._total
 
     def __isub__(self, n: int) -> None:
-        if (self.value - n) > -1:
-            self.value -= n
+        if (self._value - n) > -1:
+            self._value -= n
         else:
-            self.value = 0
+            self._value = 0
 
     @tasks.loop(minutes=3)
     async def auto_regen(self) -> None:
         self += 1
 
     @tasks.loop(count=1)
-    async def claim_dk(self, channel, prefix, cooldown=86000) -> None:
+    async def claim_dk(self, channel, prefix, cooldown=DAY_IN_SECONDS) -> None:
         while True:
             try:
                 await channel.send(f"{prefix}dk")
@@ -44,9 +56,9 @@ class Kakera:
                 continue
             break
 
-        self.value = self.total
+        self._value = self._total
         print(f"Claimed dk on {channel.guild.name}.\n")
-        await self.dk.set_cooldown(cooldown)
+        await self._dk.set_cooldown(cooldown)
 
     async def can_claim(self, channel, cost) -> bool:
         """
@@ -56,17 +68,17 @@ class Kakera:
         :param key: Whether the user has 10 keys to reduce the cost.
         """
         print(f"Cheking if you can claim kakera on {channel.guild.name}...")
-        if self.value >= cost:
+        if self._value >= cost:
             print(f"... You can claim kakera on {channel.guild.name}.\n")
             return True
 
-        if not self.dk.on_cooldown:
+        if not self._dk.on_cooldown:
             print(f"... You can claim kakera on {channel.guild.name}.\n")
-            await self.dk.set_cooldown()
+            await self._dk.set_cooldown()
             return True
 
         print(
-            f"... You don't have enough kakera ({self.value}) on {channel.guild.name}.\n"
+            f"... You don't have enough kakera ({self._value}) on {channel.guild.name}.\n"
         )
         return False
 
@@ -74,13 +86,15 @@ class Kakera:
         """
         Claims kakera from the given message.
         :param message: The Discord message to claim kakera from.
+        :param half: Whether to claim half of the kakera.
+        :param delay: The delay in seconds before claiming kakera.
         """
         channel = message.channel
         print(f"Waiting {delay} to claim kakera on {channel.guild.name}.\n")
         await sleep(delay)
 
         # I don't know if Mudae rounds to floor or ceil.
-        cost = self.cost // 2 if half else self.cost
+        cost = self._cost // 2 if half else self._cost
 
         if not await self.can_claim(channel, cost):
             return
