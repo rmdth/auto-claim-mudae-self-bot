@@ -48,7 +48,9 @@ class Kakera:
         self += 1
 
     @tasks.loop(count=1)
-    async def claim_dk(self, channel, prefix, cooldown=DAY_IN_SECONDS) -> None:
+    async def claim_dk(
+        self, channel, prefix: str = "$", cooldown=DAY_IN_SECONDS
+    ) -> None:
         while True:
             try:
                 await channel.send(f"{prefix}dk")
