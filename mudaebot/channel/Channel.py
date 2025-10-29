@@ -205,6 +205,7 @@ class Channel:
 
         if roll_type == "kakera":
             await self.kakera_claim(message)
+            return
 
         char_name = embed["author"]["name"]
         description = embed["description"]
@@ -219,6 +220,7 @@ class Channel:
             )
 
             self.roll_claim(self._rolls.rolling.wished_rolls_being_watched, message)
+            return
 
         if Cooldown.next_claim(
             self._timezone, self._minute_reset, self._shifthour
@@ -237,6 +239,7 @@ class Channel:
 
     def roll_claim(self, rolls, message) -> None:
         self._rolls.rolling.add_roll(
+            self,
             rolls,
             message=message,
             prefix=self._prefix,
