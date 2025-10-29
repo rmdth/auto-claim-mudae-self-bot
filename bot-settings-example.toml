@@ -3,6 +3,7 @@
 token = "YOUR_DISCORD_ACCOUNT_TOKEN"
 UTC_delta = 0                  # For example VET is UTC-4 so -4
 
+# You can get most of this by the mudae $settings command
 # Add more channels by copy pasting the entire [[channels_information]]
 [[channels_information]]
 id = 1111111111111111111       # To be more specific the id of the channel to roll in
@@ -12,9 +13,11 @@ prefix = "$"                   # The prefix of the server
 command = "mx"                 # The command to roll
 shifthour = 0                  # $shifthour of the server
 restart_time_minute = 40       # The minute where the rolls restart
-uptime = 40                    # The delay for the Roll claims
-delay = 40                     # The delay for the kakera claims
-max_rt_cooldown_in_seconds = 72000
+uptime = 40                    # The delay YOU want for the Roll claims
+delay = 40                     # The delay YOU want for the kakera_power_total claims
+
+# This one varies depending on your kakera loot
+max_rt_cooldown_in_seconds = 72000 
 kakera_power_total = 110
 wish_list = [                  # Case sensitive
     "Raiden Mei",
