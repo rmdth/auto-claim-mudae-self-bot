@@ -91,5 +91,5 @@ class Cooldown:
         Returns the current cooldown time remaining.
         """
         if not self.on_cooldown:
-            return float("inf")
+            return 0.0
         return self.cooldown_completes - time.time()
