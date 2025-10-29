@@ -59,7 +59,6 @@ class MudaeBot(discord.Client):
             )
 
             claim = await Channel.get_current_claim(tu)
-            print(claim)
             if not claim:
                 claim = Cooldown(
                     cooldown=await Channel.get_msg_time(
@@ -120,6 +119,7 @@ class MudaeBot(discord.Client):
                 information["settings"]["delay"],
                 information["settings"]["shifthour"],
                 information["settings"]["restart_time_minute"],
+                information["settings"]["last_claim_threshold_in_seconds"],
             )
             self.channels[information["id"]].kakera.auto_regen.start()
             self.channels[information["id"]].rolls.rolling.rolling.start(
