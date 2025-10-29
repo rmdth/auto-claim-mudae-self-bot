@@ -105,10 +105,11 @@ class Rolling:
         timezone: int,
         uptime: float = 0.0,
     ):
-        await sleep(uptime)
 
         if not await self.can_claim(channel, prefix):
             return
+
+        await sleep(uptime)
 
         print(f"Deciding claim for channel {channel.name}")
 
