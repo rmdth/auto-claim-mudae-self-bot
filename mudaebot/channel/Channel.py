@@ -20,7 +20,7 @@ class Channel:
 
     # None means available IF len 2 (hours and minutes), len 1 (minutes)
     daily_in_tu_pattern = re_compile(r"\$daily\D+(\d\d+)?\D+(\d+)")
-    rt_in_tu_pattern = re_compile(r"\$rt\D+(\d|)?\D+(\d+)")
+    rt_in_tu_pattern = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
     dk_in_tu_pattern = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
 
     # [0] = Kakera Value, [1] = Kakera Cost. None means something changed.
@@ -203,7 +203,9 @@ class Channel:
         if not roll_type:
             return
 
-        if roll_type == "kakera":
+        if roll_type == "kakera" and await self.kakera.can_claim(
+            message.channel, self._kakera.cost, self._prefix
+        ):
             await self.kakera_claim(message)
 
         char_name = embed["author"]["name"]
