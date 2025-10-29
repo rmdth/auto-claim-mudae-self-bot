@@ -5,14 +5,14 @@ from datetime import timezone
 import discord
 from discord.ext import tasks
 
+
+from .constants import MUDAE_ID
 from .channel.Channel import Channel
 from .channel.rolls.Rolls import Rolls
 from .channel.rolls.rolling.Rolling import Rolling
 from .channel.kakera.Kakera import Kakera
 from .channel.cooldown.Cooldown import Cooldown
 
-
-MUDAE_ID: int = 432610292342587392
 MAX_MUDAE_COOLDOWN: int = 72000
 
 
