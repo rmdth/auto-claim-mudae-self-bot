@@ -83,7 +83,7 @@ class Rolling:
         print(f"You can't claim on {channel.guild.name} :(\n")
         return False
 
-    async def add_roll(
+    def add_roll(
         self, rolls: list, message, prefix, minute_reset, shifthour, timezone, uptime
     ) -> None:
         rolls.append(message)
@@ -132,7 +132,9 @@ class Rolling:
             await rolls[0].components[0].children[0].click()
             message = f"{Rolls.get_roll_name_n_series(rolls[0])} claimed on {channel.guild.name}! \n"
             self.claim.set_cooldown.start(
-                Cooldown.next_claim(minute_reset, shifthour, timezone)
+                Cooldown.next_claim(
+                    timezone=timezone, minute_reset=minute_reset, shifthour=shifthour
+                )
             )
         except InvalidData:
             message = f"Failed to claim {Rolls.get_roll_name_n_series(rolls[0])} on {channel.guild.name} :( \n"
