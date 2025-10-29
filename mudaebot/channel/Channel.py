@@ -223,10 +223,6 @@ class Channel:
                 self._rolls.rolling.wished_rolls_being_watched, message
             )
 
-        print(
-            self._rolls.rolling.claim.is_cooldown_less_than(),
-            await Rolls.is_minimum_kakera(message, self._rolls.min_kakera_value),
-        )
         if (
             self._rolls.rolling.claim.is_cooldown_less_than()
             or await Rolls.is_minimum_kakera(message, self._rolls.min_kakera_value)
