@@ -4,6 +4,7 @@ from re import compile as re_compile
 from discord.errors import NotFound
 
 from ..constants import MUDAE_ID
+from .cooldown.Cooldown import Cooldown
 from .kakera.Kakera import Kakera
 from .rolls.Rolls import Rolls
 
@@ -15,7 +16,7 @@ class Channel:
     current_claim_in_tu_pattern = re_compile(r"__(.+)__.+\.")
 
     # Always finds. Only use after checking curr_claim
-    current_claim_time_pattern = re_compile(r",\D+(\d+)?\D+(\d+)\D+\.")
+    current_claim_time_pattern = re_compile(r",\D+(\d+)?\D+(\d+).+min")
 
     # None means available IF len 2 (hours and minutes), len 1 (minutes)
     daily_in_tu_pattern = re_compile(r"\$daily\D+(\d\d+)?\D+(\d+)")
@@ -153,6 +154,7 @@ class Channel:
         delay: int = 0,
         shifthour: int = 0,
         minute_reset: int = 30,
+        last_claim_threshold_in_seconds: int = 3600,
     ) -> None:
         self._kakera: Kakera = kakera
         self._rolls: Rolls = rolls
@@ -163,6 +165,7 @@ class Channel:
         self._delay: int = delay
         self._shifthour: int = shifthour
         self._minute_reset: int = minute_reset
+        self._last_claim_threshold_in_seconds: int = last_claim_threshold_in_seconds
 
     @property
     def kakera(self) -> Kakera:
@@ -224,9 +227,10 @@ class Channel:
                 self._rolls.rolling.wished_rolls_being_watched, message
             )
 
-        if (
-            self._rolls.rolling.claim.is_cooldown_less_than()
-            or await Rolls.is_minimum_kakera(message, self._rolls.min_kakera_value)
+        if Cooldown.next_claim(
+            self._timezone, self._minute_reset, self._shifthour
+        ) < self._last_claim_threshold_in_seconds or await Rolls.is_minimum_kakera(
+            message, self._rolls.min_kakera_value
         ):
             print(
                 f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to regular_claims.\n"
