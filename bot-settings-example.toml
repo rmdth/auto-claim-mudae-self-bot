@@ -1,49 +1,57 @@
 # Make sure to change this file name to bot-settings.toml
 
 token = "YOUR_DISCORD_ACCOUNT_TOKEN"
-UTC_delta = 0                        # For example VET is UTC-4 so -4
+UTC_delta = 0                  # For example VET is UTC-4 so -4
 
-rolling = true #Not used atm
-
-
+# Add more channels by copy pasting the entire [[channels_information]]
 [[channels_information]]
-id = 1401822203103678546 # To be more specific the id of the channel to roll in
+id = 1111111111111111111       # To be more specific the id of the channel to roll in
 [channels_information.settings]
-rolls = 10                     # Roll quantity
-prefix = "$"
+max_rolls = 10                 # Max roll quantity
+prefix = "$"                   # The prefix of the server
 command = "mx"                 # The command to roll
 shifthour = 0                  # $shifthour of the server
 restart_time_minute = 40       # The minute where the rolls restart
-delay = 40                     # Will wait this amount of seconds before claiming
-rt_cooldown_in_seconds = 72000
-# Get most of this by $ku
+uptime = 40                    # The delay for the Roll claims
+delay = 40                     # The delay for the kakera claims
+max_rt_cooldown_in_seconds = 72000
 kakera_power_total = 110
-kakera_power_cost = 36
-kakera_power_value = 110
-wish_list = [ # Case sensitive
+wish_list = [                  # Case sensitive
     "Raiden Mei",
     "Zero Two",
 ]
 wish_series = ["Naruto", "Pokedex"]
-min_kakera_value = 200 # Anything greather than this value will be "wished"
+
+# You can specify the kakera type that will be claimed.
+# "kakera" means any kakera. if you want this don't change it
+# visit https://mudae.fandom.com/wiki/Kakera to see the colors. 
+# Just add the color initial in uppercase.
+# Example: 
+# wish_kakera = ["kakeraT", "kakeraO"]
+wish_kakera = [
+    "kakera", 
+    ]
+min_kakera_value = 200 # Any roll with kakera equal or greater than this value will be claimed
 
 # You add more channels by copy pasting the entire [[channels_information]]
 [[channels_information]]
-id = 1401974432876072970 # 
+id = 1111111111111111111 
 [channels_information.settings]
-rolls = 11
-prefix = "$"
-command = "mx"
-shifthour = 0
-restart_time_minute = 32
-delay = 40
-rt_cooldown_in_seconds = 72000
+max_rolls = 10                 
+prefix = "$"                    # The prefix of the server
+    command = "mx"                 
+shifthour = 0                  
+restart_time_minute = 40       
+uptime = 40                    
+delay = 40                     
+max_rt_cooldown_in_seconds = 72000
 kakera_power_total = 110
-kakera_power_cost = 36
-kakera_power_value = 110
-wish_list = [ # Case sensitive
+wish_list = [ 
     "Raiden Mei",
     "Zero Two",
 ]
 wish_series = ["Naruto", "Pokedex"]
-min_kakera_value = 200 # Anything greather than this value will be "wished"
+wish_kakera = [
+    "kakera", # 
+    ]
+min_kakera_value = 200

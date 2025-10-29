@@ -1,24 +1,25 @@
-from datetime import timedelta, timezone
-from typing import Any
 from tomllib import load
+from datetime import timezone, timedelta
 
-from src.MudaeBot import MudaeBot
+from mudaebot.MudaeBot import MudaeBot
 
-settings: dict[str, Any] = load(open("settings.toml", "rb"))
 settings = load(open("./bot-settings.toml", "rb"))
 
 channels_information = {}
-utc_delta: int = settings["UTC_delta"]
+utc_delta: float = settings["UTC_delta"]
+TIME_ZONE: timezone = timezone(timedelta(hours=utc_delta))
 
 
 for information in settings["channels_information"]:
     channels_information[information["id"]] = {
+        "id": information["id"],
         "settings": information["settings"],
     }
 
+bot = MudaeBot(
+    timezone=TIME_ZONE,
+    channels_information=channels_information,
+)
 
-MUDAE_ID = 432610292342587392
-TIME_ZONE = timezone(timedelta(hours=utc_delta))
 
-bot = MudaeBot()
 bot.run(settings["token"], reconnect=True)
