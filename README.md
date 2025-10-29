@@ -12,22 +12,20 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 
 - Claims wishlist characters and given ones.
 - Claims by series.
-- Claims kakera.
+- Claims kakera with desired colors.
 - Claims with given delay.
-- Auto claim if its last hour claim.
+- Auto claim if its on given last seconds.
 - Checks if dk and rt are available to use them.
+- Gets $tu information on setup
 - Reconnects.
 
 ## Cool things to add
 
+- Adjust claim kakera cost for characters with 10+ keys.
 - Adjust to different restart claims. Currently I dont know how does the 120 minute claim works to make it.
 - Currently is made for kakera value efficiency. It would be cool to use rt only for wished ones or have different modes if there are any.
-- Choose which kakera color you wanna claim.
-- Adjust claim kakera cost for characters with 10+ keys.
-- No need to provide the $ku and $rtu information aswell as the availability of claim and rt to settings and get them at setup.
 - Tests.
-
-- Maybe Inherit from the discord.TextChannel or the actual Abstract Class to Channel, to add prefix so it doesn't get passed as another parameter
+- Maybe Inherit from the discord.TextChannel or the actual Abstract Class to Channel, so when it takes a channel as a parameter it can be a channel object you don't have to provide prefix, minute_reset and those stuff.
 
 ## Known Issues
 
@@ -70,7 +68,32 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. **Read and Change bot-settings-example.toml**.
+4. **Make sure to read and Change bot-settings-example.toml**.
 
 5. **Run**:
-   `python MudaeBot.py`
+   `python main.py`
+
+## Configuration reference
+
+You will edit or copy `bot-settings-exmaple.toml` and rename that to `bot-settings.toml`. Most values can be grabbed with Mudae's `$settings` command.
+
+- `token`: Your Discord account token.
+- `UTC_delta`: Your offset from UTC (for example VET is UTC-4 so `-4`).
+
+Each `[[channels_information]]` block is one channel (copy it to add more):
+
+- `id`: Channel id where rolls happen.
+- `[channels_information.settings]`: Everything inside is per channel.
+  - `max_rolls`: Max rolls you can do in that channel.
+  - `prefix`: Server prefix for mudae.
+  - `command`: Command you want to roll.
+  - `shifthour`: Server `$shifthour` value.
+  - `restart_time_minute`: Minute where rolls restart.
+  - `uptime`: Delay you want for roll claims.
+  - `delay`: Delay you want for kakera claims.
+  - `max_rt_cooldown_in_seconds`: Cooldown threshold before trying `$rt` again. Make sure to adjust it based on your own cooldown
+  - `kakera_power_total`: Your total kakera power.
+  - `wish_list`: Characters to always claim. _Case sensitive_.
+  - `wish_series`: Series to always claim. _Case sensitive_.
+  - `wish_kakera`: Kakera colors to click (`"kakera"` means any color leave it as it is if you want that ELSE add the color initial in uppercase. Example: `kakeraO` for orange). [reference](https://mudae.fandom.com/wiki/Kakera) _Case sensitive_.
+  - `min_kakera_value`: Minimum kakera value required to auto claim.
