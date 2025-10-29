@@ -146,6 +146,7 @@ class Channel:
         self,
         kakera,
         rolls,
+        timezone,
         prefix,
         command: str = "mx",
         uptime: int = 44,
@@ -250,4 +251,5 @@ class Channel:
             minute_reset=self._minute_reset,
             shifthour=self._shifthour,
             uptime=self._uptime,
+            timezone=self._timezone,
         )

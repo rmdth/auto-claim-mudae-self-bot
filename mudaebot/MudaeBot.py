@@ -113,6 +113,7 @@ class MudaeBot(discord.Client):
             self.channels[information["id"]] = Channel(
                 kakera,
                 rolls,
+                self.timezone,
                 information["settings"]["prefix"],
                 information["settings"]["command"],
                 information["settings"]["uptime"],

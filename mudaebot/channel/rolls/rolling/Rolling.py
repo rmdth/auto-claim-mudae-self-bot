@@ -84,13 +84,13 @@ class Rolling:
         return False
 
     async def add_roll(
-        self, rolls: list, message, prefix, minute_reset, shifthour, uptime
+        self, rolls: list, message, prefix, minute_reset, shifthour, timezone, uptime
     ) -> None:
         rolls.append(message)
 
         try:
             self.decide_claim.start(
-                message.channel, prefix, minute_reset, shifthour, uptime
+                message.channel, prefix, minute_reset, shifthour, timezone, uptime
             )
         except RuntimeError:
             pass
@@ -102,6 +102,7 @@ class Rolling:
         prefix: str,
         minute_reset: int,
         shifthour: int,
+        timezone: int,
         uptime: float = 0.0,
     ):
         await sleep(uptime)
@@ -120,16 +121,18 @@ class Rolling:
             return
 
         await Rolls.sort_by_highest_kakera(roll_list)
-        await self.claim_roll(channel, roll_list, minute_reset, shifthour)
+        await self.claim_roll(channel, roll_list, minute_reset, shifthour, timezone)
 
-    async def claim_roll(self, channel, rolls, minute_reset, shifthour) -> None:
+    async def claim_roll(
+        self, channel, rolls, minute_reset, shifthour, timezone
+    ) -> None:
         message = ""
 
         try:
             await rolls[0].components[0].children[0].click()
             message = f"{Rolls.get_roll_name_n_series(rolls[0])} claimed on {channel.guild.name}! \n"
             self.claim.set_cooldown.start(
-                Cooldown.next_claim(channel.guild.timezone, minute_reset, shifthour)
+                Cooldown.next_claim(minute_reset, shifthour, timezone)
             )
         except InvalidData:
             message = f"Failed to claim {Rolls.get_roll_name_n_series(rolls[0])} on {channel.guild.name} :( \n"
