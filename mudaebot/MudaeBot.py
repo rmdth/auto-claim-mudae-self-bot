@@ -1,4 +1,6 @@
+from asyncio import gather
 from datetime import timezone
+
 
 import discord
 from discord.ext import tasks
@@ -49,85 +51,94 @@ class MudaeBot(discord.Client):
 
     @tasks.loop(count=1)
     async def setup(self) -> None:
-        for information in self.channels_information.values():
-            channel = self.get_channel(information["id"])
+        await gather(
+            *(
+                self.setup_channels(information)
+                for information in self.channels_information.values()
+            )
+        )
 
-            tu = await Channel.get_tu(
-                self,
-                channel,
-                information["settings"]["prefix"],
+    async def setup_channels(self, information: dict) -> None:
+        channel = self.get_channel(information["id"])
+
+        if channel is None:
+            print(f"Channel {information['id']} not found.")
+            return
+
+        tu = await Channel.get_tu(
+            self,
+            channel,
+            information["settings"]["prefix"],
+        )
+
+        claim = Channel.get_current_claim(tu)
+        if not claim:
+            claim = Cooldown(
+                cooldown=Channel.get_msg_time(Channel.get_current_claim_time(tu)),
+                max_cooldown=10800,
+            )
+        else:
+            claim = Cooldown(max_cooldown=10800)
+
+        rt = Channel.get_rt(tu)
+        if not rt:
+            rt = Cooldown(
+                max_cooldown=information["settings"]["max_rt_cooldown_in_seconds"]
+            )
+        else:
+            rt = Cooldown(
+                cooldown=Channel.get_msg_time(rt),
+                max_cooldown=information["settings"]["max_rt_cooldown_in_seconds"],
             )
 
-            claim = await Channel.get_current_claim(tu)
-            if not claim:
-                claim = Cooldown(
-                    cooldown=await Channel.get_msg_time(
-                        await Channel.get_current_claim_time(tu)
-                    ),
-                    max_cooldown=10800,
-                )
-            else:
-                claim = Cooldown(max_cooldown=10800)
+        rolling = Rolling(claim, rt)
+        rolls = Channel.get_rolls(tu)
+        rolls = Rolls(
+            rolling,
+            information["settings"]["wish_list"],
+            information["settings"]["wish_series"],
+            rolls=int(rolls[0]) if rolls else 0,
+            max_rolls=information["settings"]["max_rolls"],
+            min_kakera_value=information["settings"]["min_kakera_value"],
+        )
 
-            rt = await Channel.get_rt(tu)
-            if not rt:
-                rt = Cooldown(
-                    max_cooldown=information["settings"]["max_rt_cooldown_in_seconds"]
-                )
-            else:
-                rt = Cooldown(
-                    cooldown=await Channel.get_msg_time(rt),
-                    max_cooldown=information["settings"]["max_rt_cooldown_in_seconds"],
-                )
-
-            rolling = Rolling(claim, rt)
-            rolls = await Channel.get_rolls(tu)
-            rolls = Rolls(
-                rolling,
-                information["settings"]["wish_list"],
-                information["settings"]["wish_series"],
-                rolls=int(rolls[0]) if rolls else 0,
-                max_rolls=information["settings"]["max_rolls"],
-                min_kakera_value=information["settings"]["min_kakera_value"],
+        dk = Channel.get_dk(tu)
+        if not dk:
+            dk = Cooldown(max_cooldown=MAX_MUDAE_COOLDOWN)
+        else:
+            dk = Cooldown(
+                cooldown=Channel.get_msg_time(dk),
+                max_cooldown=MAX_MUDAE_COOLDOWN,
             )
 
-            dk = await Channel.get_dk(tu)
-            if not dk:
-                dk = Cooldown(max_cooldown=MAX_MUDAE_COOLDOWN)
-            else:
-                dk = Cooldown(
-                    cooldown=await Channel.get_msg_time(dk),
-                    max_cooldown=MAX_MUDAE_COOLDOWN,
-                )
+        kakera = Channel.get_kakera(tu)
+        kakera = Kakera(
+            int(kakera[0]),
+            int(kakera[1]),
+            information["settings"]["kakera_power_total"],
+            dk,
+            information["settings"]["wish_kakera"],
+        )
 
-            kakera = await Channel.get_kakera(tu)
-            kakera = Kakera(
-                int(kakera[0]),
-                int(kakera[1]),
-                information["settings"]["kakera_power_total"],
-                dk,
-                information["settings"]["wish_kakera"],
-            )
-
-            self.channels[information["id"]] = Channel(
-                kakera,
-                rolls,
-                self.timezone,
-                information["settings"]["prefix"],
-                information["settings"]["command"],
-                information["settings"]["uptime"],
-                information["settings"]["delay"],
-                information["settings"]["shifthour"],
-                information["settings"]["restart_time_minute"],
-                information["settings"]["last_claim_threshold_in_seconds"],
-            )
-            self.channels[information["id"]].kakera.auto_regen.start()
-            self.channels[information["id"]].rolls.rolling.rolling.start(
-                self.channels[information["id"]].rolls,
-                channel,
-                self.channels[information["id"]].prefix,
-                self.channels[information["id"]].command,
-            )
+        self.channels[information["id"]] = Channel(
+            kakera,
+            rolls,
+            self.timezone,
+            information["settings"]["prefix"],
+            information["settings"]["command"],
+            information["settings"]["uptime"],
+            information["settings"]["delay"],
+            information["settings"]["shifthour"],
+            information["settings"]["restart_time_minute"],
+            information["settings"]["last_claim_threshold_in_seconds"],
+        )
+        self.channels[information["id"]].kakera.auto_regen.start()
+        self.channels[information["id"]].rolls.rolling.rolling.start(
+            self.channels[information["id"]].rolls,
+            channel,
+            self.channels[information["id"]].prefix,
+            self.channels[information["id"]].command,
+        )
 
     @setup.before_loop
     async def wait_for_ready(self) -> None:
