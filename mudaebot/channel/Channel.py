@@ -33,18 +33,13 @@ class Channel:
     @staticmethod
     async def found_tu(bot, channel):
         try:
-            await bot.wait_for(
+            last_message = await bot.wait_for(
                 "message",
                 check=lambda message: message.channel == channel
                 and message.author.id == MUDAE_ID,
                 timeout=0.5,
             )
         except TimeoutError:
-            return None
-
-        try:
-            last_message = await channel.fetch_message(channel.last_message_id)
-        except NotFound:
             return None
 
         if Channel.find_tu_pattern.search(last_message.content):
@@ -66,21 +61,21 @@ class Channel:
         return tu
 
     @staticmethod
-    async def get_current_claim(message) -> list[str]:
+    def get_current_claim(message) -> list[str]:
         """
         Something means available else []
         """
         return Channel.current_claim_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    async def get_current_claim_time(message) -> list[tuple[str, str]]:
+    def get_current_claim_time(message) -> list[tuple[str, str]]:
         """
         Always returns the time. Only use after checking curr_claim_status
         """
         return Channel.current_claim_time_pattern.findall(message.content)
 
     @staticmethod
-    async def get_daily(message) -> list[str]:
+    def get_daily(message) -> list[str]:
         """
         [] means available IF len 2 (hours and minutes), len 1 (minutes)
 
@@ -88,28 +83,28 @@ class Channel:
         return Channel.daily_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    async def get_rt(message) -> list[str]:
+    def get_rt(message) -> list[str]:
         """
         [] means available IF len 2 (hours and minutes), len 1 (minutes)
         """
         return Channel.rt_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    async def get_dk(message) -> list[str]:
+    def get_dk(message) -> list[str]:
         """
         [] means available IF len 2 (hours and minutes), len 1 (minutes)
         """
         return Channel.dk_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    async def get_kakera(message) -> list[str]:
+    def get_kakera(message) -> list[str]:
         """
         [0] = Kakera Value, [1] = Kakera Cost. None means BIGGG EROOR!!!
         """
         return Channel.kakera_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    async def get_rolls(message) -> list[str]:
+    def get_rolls(message) -> list[str]:
         """
         [0] = Current available_regular_claims rolls_for_guilds.
         [1] Could be used to start rolling... But not for now.
@@ -117,7 +112,7 @@ class Channel:
         return Channel.current_rolls_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    async def get_msg_time(tempo: list[tuple[str, str]]) -> int:
+    def get_msg_time(tempo: list[tuple[str, str]]) -> int:
         if not tempo[0]:
             return 0
 
@@ -223,9 +218,7 @@ class Channel:
                 f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to wished_claims.\n"
             )
 
-            await self.roll_claim(
-                self._rolls.rolling.wished_rolls_being_watched, message
-            )
+            self.roll_claim(self._rolls.rolling.wished_rolls_being_watched, message)
 
         if Cooldown.next_claim(
             self._timezone, self._minute_reset, self._shifthour
@@ -235,17 +228,15 @@ class Channel:
             print(
                 f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to regular_claims.\n"
             )
-            await self.roll_claim(
-                self._rolls.rolling.regular_rolls_being_watched, message
-            )
+            self.roll_claim(self._rolls.rolling.regular_rolls_being_watched, message)
 
     async def kakera_claim(self, message) -> None:
         # half = (Kakera.get_keys(message) > 9
         #     and "You are the owner")
         await self._kakera.claim(message, self._prefix, delay=self._delay)
 
-    async def roll_claim(self, rolls, message) -> None:
-        await self._rolls.rolling.add_roll(
+    def roll_claim(self, rolls, message) -> None:
+        self._rolls.rolling.add_roll(
             rolls,
             message=message,
             prefix=self._prefix,
