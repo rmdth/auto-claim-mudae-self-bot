@@ -131,11 +131,16 @@ class Rolling:
         try:
             await rolls[0].components[0].children[0].click()
             message = f"{Rolls.get_roll_name_n_series(rolls[0])} claimed on {channel.guild.name}! \n"
-            self.claim.set_cooldown.start(
-                Cooldown.next_claim(
-                    timezone=timezone, minute_reset=minute_reset, shifthour=shifthour
+            try:
+                self.claim.set_cooldown.start(
+                    Cooldown.next_claim(
+                        timezone=timezone,
+                        minute_reset=minute_reset,
+                        shifthour=shifthour,
+                    )
                 )
-            )
+            except RuntimeError:
+                message = f"Trying to set cooldown when already on cooldown on {channel.guild.name} \n"
         except InvalidData:
             message = f"Failed to claim {Rolls.get_roll_name_n_series(rolls[0])} on {channel.guild.name} :( \n"
 
