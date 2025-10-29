@@ -203,9 +203,7 @@ class Channel:
         if not roll_type:
             return
 
-        if roll_type == "kakera" and await self.kakera.can_claim(
-            message.channel, self._kakera.cost, self._prefix
-        ):
+        if roll_type == "kakera":
             await self.kakera_claim(message)
 
         char_name = embed["author"]["name"]

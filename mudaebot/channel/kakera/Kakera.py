@@ -106,14 +106,16 @@ class Kakera:
         :param delay: The delay in seconds before claiming kakera.
         """
         channel = message.channel
-        print(f"Waiting {delay} to claim kakera on {channel.guild.name}.\n")
-        await sleep(delay)
 
         # I don't know if Mudae rounds to floor or ceil.
         cost = self._cost // 2 if half else self._cost
 
         if not await self.can_claim(channel, cost, prefix):
+            print(f"Can't claim kakera on {channel.guild.name} :(")
             return
+
+        print(f"Waiting {delay} to claim kakera on {channel.guild.name}.\n")
+        await sleep(delay)
 
         # I don't know what causes this, that's why im not putting While True
         try:
