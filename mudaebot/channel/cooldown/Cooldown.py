@@ -14,11 +14,11 @@ class Cooldown:
         if not 0 <= minute_reset <= 59:
             raise ValueError("minute_   reset must be between 0 and 59 inclusive")
 
-        now = datetime.now(tz=timezone) if timezone else datetime.now()
+        now = datetime.now(tz=timezone)
         shifted_now = now - timedelta(hours=shifthour)
 
         if (
-            shifted_now.hour % 3 == 0
+            shifted_now.hour % 3 == 1
             and shifted_now.minute == minute_reset
             and shifted_now.second == 0
             and shifted_now.microsecond == 0
@@ -26,7 +26,7 @@ class Cooldown:
             return 0.0
 
         time = shifted_now.replace(minute=0, second=0, microsecond=0)
-        hours_to_add = (-time.hour) % 3
+        hours_to_add = (1 - time.hour) % 3
         time += timedelta(hours=hours_to_add)
         time = time.replace(minute=minute_reset)
 
