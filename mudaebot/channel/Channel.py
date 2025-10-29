@@ -72,7 +72,7 @@ class Channel:
         return Channel.current_claim_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    async def get_current_claim_time(message) -> list[str]:
+    async def get_current_claim_time(message) -> list[tuple[str, str]]:
         """
         Always returns the time. Only use after checking curr_claim_status
         """
@@ -157,6 +157,7 @@ class Channel:
         self._kakera: Kakera = kakera
         self._rolls: Rolls = rolls
         self._prefix: str = prefix
+        self._timezone = timezone
         self._command: str = command
         self._uptime: int = uptime
         self._delay: int = delay
