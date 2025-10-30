@@ -58,7 +58,7 @@ class Cooldown:
 
     def __bool__(self) -> bool:
         """
-        Returns True if the cooldown is active, False otherwise.
+        Returns True if the cooldown is not active, False otherwise.
         """
         return not self.on_cooldown
 
