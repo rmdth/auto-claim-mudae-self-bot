@@ -204,7 +204,7 @@ class Channel:
     def minute_reset(self) -> int:
         return self._minute_reset
 
-    async def should_i_claim(self, bot, user: int, message) -> None:
+    async def should_i_claim(self, bot, user, message) -> None:
         if not message.embeds:
             return
 
@@ -214,7 +214,7 @@ class Channel:
             return
 
         if roll_type == "kakera":
-            await self.kakera_claim(user, message)
+            await self.kakera_claim(bot, user, message)
             return
 
         char_name = embed["author"]["name"]
@@ -246,7 +246,7 @@ class Channel:
                 bot, self._rolls.rolling.regular_rolls_being_watched, message
             )
 
-    async def kakera_claim(self, user, message) -> None:
+    async def kakera_claim(self, bot, user, message) -> None:
         half = False
         if (
             Rolls.get_roll_kakera_keys(message) > 9
@@ -254,7 +254,9 @@ class Channel:
         ):
             half = True
 
-        await self._kakera.claim(message, self._prefix, half=half, delay=self._delay)
+        await self._kakera.claim(
+            bot, message, self._prefix, half=half, delay=self._delay
+        )
 
     def roll_claim(self, bot, rolls, message) -> None:
         self._rolls.rolling.add_roll(
