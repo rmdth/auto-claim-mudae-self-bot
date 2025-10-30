@@ -1,4 +1,4 @@
-from asyncio import gather
+from asyncio import gather, sleep
 from datetime import timezone
 
 
@@ -57,6 +57,7 @@ class MudaeBot(discord.Client):
                 for information in self.channels_information.values()
             )
         )
+        await sleep(1)
 
     async def setup_channels(self, information: dict) -> None:
         channel = self.get_channel(information["id"])
