@@ -206,7 +206,7 @@ class Channel:
     def minute_reset(self) -> int:
         return self._minute_reset
 
-    async def should_i_claim(self, user_id: int, message) -> None:
+    async def should_i_claim(self, user: int, message) -> None:
         if not message.embeds:
             return
 
@@ -216,14 +216,14 @@ class Channel:
             return
 
         if roll_type == "kakera":
-            await self.kakera_claim(message)
+            await self.kakera_claim(user, message)
             return
 
         char_name = embed["author"]["name"]
         description = embed["description"]
 
         if (
-            str(user_id) in message.content
+            str(user.id) in message.content
             or char_name in self._rolls.wish_list
             or description in self._rolls.wish_series
         ):
@@ -244,10 +244,15 @@ class Channel:
             )
             self.roll_claim(self._rolls.rolling.regular_rolls_being_watched, message)
 
-    async def kakera_claim(self, message) -> None:
-        # half = (Kakera.get_keys(message) > 9
-        #     and "You are the owner")
-        await self._kakera.claim(message, self._prefix, delay=self._delay)
+    async def kakera_claim(self, user, message) -> None:
+        half = False
+        if (
+            Channel.kakera_keys_pattern.findall(message.content)[0] > 9
+            and user.name in message.embeds[0].to_dict()["footer"]["text"]
+        ):
+            half = True
+
+        await self._kakera.claim(message, self._prefix, half=half, delay=self._delay)
 
     def roll_claim(self, rolls, message) -> None:
         self._rolls.rolling.add_roll(
