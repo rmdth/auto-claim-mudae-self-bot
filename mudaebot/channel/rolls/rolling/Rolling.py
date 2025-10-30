@@ -3,6 +3,8 @@ from asyncio import sleep
 from discord.errors import NotFound, InvalidData
 from discord.ext import tasks
 
+from main import bot
+
 from ....constants import MUDAE_ID
 
 from ...cooldown.Cooldown import Cooldown
@@ -71,16 +73,18 @@ class Rolling:
                 rt_message = await channel.send(f"{prefix}rt")
             except NotFound:
                 continue
-            try:
-                await bot.wait_for(
-                    "reaction_add",
-                    check=lambda reaction, user: reaction.message.id == rt_message.id
-                    and user.id == MUDAE_ID
-                    and str(reaction.emoji) == "✅",
-                    timeout=1,
-                )
-            except TimeoutError:
-                continue
+            while True:
+                try:
+                    await bot.wait_for(
+                        "raw_reaction_add",
+                        check=lambda payload: payload.message_id == rt_message.id
+                        and payload.user_id == MUDAE_ID
+                        and str(payload.emoji) == "✅",
+                        timeout=1,
+                    )
+                    break
+                except TimeoutError:
+                    continue
             break
 
         print(f"Claimed rt on {channel.guild.name}\n")
