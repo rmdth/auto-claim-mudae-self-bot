@@ -3,12 +3,10 @@ from asyncio import sleep
 from discord.errors import NotFound, InvalidData
 from discord.ext import tasks
 
-from main import bot
-
-from ....constants import MUDAE_ID
-
 from ...cooldown.Cooldown import Cooldown
 from ..Rolls import Rolls
+
+from ....constants import MUDAE_ID
 
 
 class Rolling:
