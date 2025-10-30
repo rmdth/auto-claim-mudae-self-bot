@@ -1,10 +1,8 @@
-from asyncio import gather, sleep
+from asyncio import sleep
 from datetime import timezone
-
 
 import discord
 from discord.ext import tasks
-
 
 from .constants import MUDAE_ID
 from .channel.Channel import Channel
@@ -51,13 +49,8 @@ class MudaeBot(discord.Client):
 
     @tasks.loop(count=1)
     async def setup(self) -> None:
-        await gather(
-            *(
-                self.setup_channels(information)
-                for information in self.channels_information.values()
-            )
-        )
-        await sleep(1)
+        for information in self.channels_information.values():
+            await self.setup_channels(information)
 
     async def setup_channels(self, information: dict) -> None:
         channel = self.get_channel(information["id"])
@@ -133,6 +126,8 @@ class MudaeBot(discord.Client):
             information["settings"]["restart_time_minute"],
             information["settings"]["last_claim_threshold_in_seconds"],
         )
+        await sleep(0.5)
+
         self.channels[information["id"]].kakera.auto_regen.start()
         self.channels[information["id"]].rolls.rolling.rolling.start(
             self.channels[information["id"]].rolls,
