@@ -1,9 +1,11 @@
-from asyncio import sleep
+from asyncio import TimeoutError, sleep
 
 from discord.errors import NotFound, InvalidData
 from discord.ext import tasks
 
+from ...constants import MUDAE_ID
 from ..cooldown.Cooldown import DAY_IN_SECONDS, Cooldown
+from ...patterns import KAKERA_DK_CONFIRMATION_PATTERN
 
 
 class Kakera:
@@ -56,12 +58,26 @@ class Kakera:
 
     @tasks.loop(count=1)
     async def claim_dk(
-        self, channel, prefix: str = "$", cooldown=DAY_IN_SECONDS
+        self,
+        bot,
+        channel,
+        prefix: str = "$",
+        cooldown: float = DAY_IN_SECONDS,
     ) -> None:
         while True:
             try:
                 await channel.send(f"{prefix}dk")
             except NotFound:
+                continue
+            try:
+                await bot.wait_for(
+                    "message",
+                    check=lambda message: message.channel.id == channel.id
+                    and message.author.id == MUDAE_ID
+                    and KAKERA_DK_CONFIRMATION_PATTERN.match(message.content),
+                    timeout=1,
+                )
+            except TimeoutError:
                 continue
             break
 
@@ -69,7 +85,7 @@ class Kakera:
         print(f"Claimed dk on {channel.guild.name}.\n")
         self._dk.set_cooldown.start(cooldown)
 
-    async def can_claim(self, channel, cost, prefix) -> bool:
+    async def can_claim(self, bot, channel, cost, prefix) -> bool:
         """
         Checks if you can claim kakera in the given channel.
         If you don't uses dk.
@@ -83,7 +99,7 @@ class Kakera:
 
         if self._dk:
             print(f"... You can claim kakera on {channel.guild.name}.\n")
-            await self.claim_dk(channel, prefix)
+            await self.claim_dk(bot, channel, prefix)
             return True
 
         print(
@@ -91,7 +107,9 @@ class Kakera:
         )
         return False
 
-    async def claim(self, message, prefix, half: bool = False, delay=0) -> None:
+    async def claim(
+        self, bot, message, prefix, half: bool = False, delay: float = 0
+    ) -> None:
         """
         Claims kakera from the given message.
         :param message: The Discord message to claim kakera from.
@@ -104,7 +122,7 @@ class Kakera:
         # I don't know if Mudae rounds to floor or ceil.
         cost = self._cost // 2 if half else self._cost
 
-        if not await self.can_claim(channel, cost, prefix):
+        if not await self.can_claim(bot, channel, cost, prefix):
             print(f"Can't claim kakera on {channel.guild.name} :(")
             return
 
