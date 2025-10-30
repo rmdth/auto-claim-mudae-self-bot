@@ -1,34 +1,46 @@
 from asyncio import TimeoutError
-from re import compile as re_compile
 
 from discord.errors import NotFound
 
 from ..constants import MUDAE_ID
+from ..patterns import (
+    CURRENT_CLAIM_IN_TU_PATTERN,
+    CURRENT_CLAIM_TIME_PATTERN,
+    CURRENT_ROLLS_IN_TU_PATTERN,
+    DAILY_IN_TU_PATTERN,
+    DK_IN_TU_PATTERN,
+    FIND_TU_PATTERN,
+    KAKERA_IN_TU_PATTERN,
+    KAKERA_KEYS_PATTERN,
+    RT_IN_TU_PATTERN,
+)
 from .cooldown.Cooldown import Cooldown
 from .kakera.Kakera import Kakera
 from .rolls.Rolls import Rolls
 
 
 class Channel:
-    find_tu_pattern = re_compile(r"\*\*=>\*\* \$tuarrange")
+    find_tu_pattern = FIND_TU_PATTERN
 
     # Find means available
-    current_claim_in_tu_pattern = re_compile(r"__(.+)__.+\.")
+    current_claim_in_tu_pattern = CURRENT_CLAIM_IN_TU_PATTERN
 
     # Always finds. Only use after checking curr_claim
-    current_claim_time_pattern = re_compile(r",\D+(\d+)?\D+(\d+).+min")
+    current_claim_time_pattern = CURRENT_CLAIM_TIME_PATTERN
 
     # None means available IF len 2 (hours and minutes), len 1 (minutes)
-    daily_in_tu_pattern = re_compile(r"\$daily\D+(\d\d+)?\D+(\d+)")
-    rt_in_tu_pattern = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
-    dk_in_tu_pattern = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
+    daily_in_tu_pattern = DAILY_IN_TU_PATTERN
+    rt_in_tu_pattern = RT_IN_TU_PATTERN
+    dk_in_tu_pattern = DK_IN_TU_PATTERN
 
     # [0] = Kakera Value, [1] = Kakera Cost. None means something changed.
-    kakera_in_tu_pattern = re_compile(r"(\d+)%")
+    kakera_in_tu_pattern = KAKERA_IN_TU_PATTERN
 
     # [0] = Current available_regular_claims rolls_for_guilds.
     # [1] Could be used to start rolling... Not for now.
-    current_rolls_in_tu_pattern = re_compile(r"\*\*(\d+)\*\* roll")
+    current_rolls_in_tu_pattern = CURRENT_ROLLS_IN_TU_PATTERN
+
+    kakera_keys_pattern = KAKERA_KEYS_PATTERN
 
     @staticmethod
     async def found_tu(bot, channel):

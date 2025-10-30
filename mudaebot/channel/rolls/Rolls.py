@@ -1,15 +1,16 @@
 from __future__ import annotations
-from re import compile as re_compile
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .rolling.Rolling import Rolling
 
 
+from ...patterns import ROLL_CHAR_PATTERN, ROLL_KAKERA_PATTERN
+
+
 class Rolls:
-    # get_series_pattern = re_compile(r"") TODO
-    get_kakera_pattern = re_compile(r"\*\*(\d+)\*\*")
-    get_char_pattern = re_compile(r"(.+)\s")
+    get_kakera_pattern = ROLL_KAKERA_PATTERN
+    get_char_pattern = ROLL_CHAR_PATTERN
 
     @staticmethod
     def get_roll_name(message) -> str:

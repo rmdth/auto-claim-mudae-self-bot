@@ -1,5 +1,4 @@
 from asyncio import sleep
-from re import compile as re_compile
 
 from discord.errors import NotFound, InvalidData
 from discord.ext import tasks
@@ -8,11 +7,6 @@ from ..cooldown.Cooldown import DAY_IN_SECONDS, Cooldown
 
 
 class Kakera:
-    get_keys_pattern = re_compile(r"\(.+(\d).+\)")
-
-    @staticmethod
-    def get_keys(message) -> int:
-        return int(Kakera.get_keys_pattern.findall(message.content)[0])
 
     def __init__(
         self,
