@@ -223,7 +223,7 @@ class Channel:
         if (
             str(user.id) in message.content
             or char_name in self._rolls.wish_list
-            or description in self._rolls.wish_series
+            or any(serie in description for serie in self._rolls.wish_series)
         ):
             print(
                 f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to wished_claims.\n"
