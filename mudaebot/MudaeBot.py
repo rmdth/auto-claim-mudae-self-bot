@@ -46,7 +46,7 @@ class MudaeBot(discord.Client):
 
         if message.embeds:
             await self.channels[message.channel.id].should_i_claim(
-                self.user.id, message
+                self, self.user, message
             )
 
     @tasks.loop(count=1)

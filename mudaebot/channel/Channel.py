@@ -206,7 +206,7 @@ class Channel:
     def minute_reset(self) -> int:
         return self._minute_reset
 
-    async def should_i_claim(self, user: int, message) -> None:
+    async def should_i_claim(self, bot, user: int, message) -> None:
         if not message.embeds:
             return
 
@@ -231,7 +231,9 @@ class Channel:
                 f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to wished_claims.\n"
             )
 
-            self.roll_claim(self._rolls.rolling.wished_rolls_being_watched, message)
+            self.roll_claim(
+                bot, self._rolls.rolling.wished_rolls_being_watched, message
+            )
             return
 
         if Cooldown.next_claim(
@@ -242,7 +244,9 @@ class Channel:
             print(
                 f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to regular_claims.\n"
             )
-            self.roll_claim(self._rolls.rolling.regular_rolls_being_watched, message)
+            self.roll_claim(
+                bot, self._rolls.rolling.regular_rolls_being_watched, message
+            )
 
     async def kakera_claim(self, user, message) -> None:
         half = False
@@ -254,9 +258,9 @@ class Channel:
 
         await self._kakera.claim(message, self._prefix, half=half, delay=self._delay)
 
-    def roll_claim(self, rolls, message) -> None:
+    def roll_claim(self, bot, rolls, message) -> None:
         self._rolls.rolling.add_roll(
-            self,
+            bot,
             rolls,
             message=message,
             prefix=self._prefix,
