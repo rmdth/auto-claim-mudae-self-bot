@@ -2,6 +2,10 @@ from asyncio import TimeoutError
 
 from discord.errors import NotFound
 
+from .cooldown.Cooldown import Cooldown
+from .kakera.Kakera import Kakera
+from .rolls.Rolls import Rolls
+
 from ..constants import MUDAE_ID
 from ..patterns import (
     CURRENT_CLAIM_IN_TU_PATTERN,
@@ -13,9 +17,6 @@ from ..patterns import (
     KAKERA_IN_TU_PATTERN,
     RT_IN_TU_PATTERN,
 )
-from .cooldown.Cooldown import Cooldown
-from .kakera.Kakera import Kakera
-from .rolls.Rolls import Rolls
 
 
 class Channel:
@@ -38,8 +39,6 @@ class Channel:
     # [0] = Current available_regular_claims rolls_for_guilds.
     # [1] Could be used to start rolling... Not for now.
     current_rolls_in_tu_pattern = CURRENT_ROLLS_IN_TU_PATTERN
-
-    kakera_keys_pattern = KAKERA_KEYS_PATTERN
 
     @staticmethod
     async def found_tu(bot, channel):
@@ -250,7 +249,7 @@ class Channel:
     async def kakera_claim(self, user, message) -> None:
         half = False
         if (
-            Channel.kakera_keys_pattern.findall(message.content)[0] > 9
+            Rolls.get_roll_kakera_keys(message) > 9
             and user.name in message.embeds[0].to_dict()["footer"]["text"]
         ):
             half = True
