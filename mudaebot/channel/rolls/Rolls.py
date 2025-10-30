@@ -5,12 +5,13 @@ if TYPE_CHECKING:
     from .rolling.Rolling import Rolling
 
 
-from ...patterns import ROLL_CHAR_PATTERN, ROLL_KAKERA_PATTERN
+from ...patterns import ROLL_CHAR_PATTERN, ROLL_KAKERA_PATTERN, KAKERA_KEYS_PATTERN
 
 
 class Rolls:
     get_kakera_pattern = ROLL_KAKERA_PATTERN
     get_char_pattern = ROLL_CHAR_PATTERN
+    get_kakera_keys_pattern = KAKERA_KEYS_PATTERN
 
     @staticmethod
     def get_roll_name(message) -> str:
@@ -42,6 +43,18 @@ class Rolls:
             Rolls.get_kakera_pattern.findall(
                 message.embeds[0].to_dict()["description"]
             )[0]
+        )
+
+    @staticmethod
+    def get_roll_kakera_keys(message) -> int:
+        return int(
+            Rolls.get_kakera_keys_pattern.findall(
+                message.embeds[0].to_dict()["description"]
+            )[0]
+            if Rolls.get_kakera_keys_pattern.findall(
+                message.embeds[0].to_dict()["description"]
+            )
+            else 0
         )
 
     @staticmethod

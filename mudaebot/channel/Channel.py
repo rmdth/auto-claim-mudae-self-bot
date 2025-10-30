@@ -11,7 +11,6 @@ from ..patterns import (
     DK_IN_TU_PATTERN,
     FIND_TU_PATTERN,
     KAKERA_IN_TU_PATTERN,
-    KAKERA_KEYS_PATTERN,
     RT_IN_TU_PATTERN,
 )
 from .cooldown.Cooldown import Cooldown
