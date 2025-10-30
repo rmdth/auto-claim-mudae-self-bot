@@ -3,6 +3,8 @@ from asyncio import sleep
 from discord.errors import NotFound, InvalidData
 from discord.ext import tasks
 
+from ....constants import MUDAE_ID
+
 from ...cooldown.Cooldown import Cooldown
 from ..Rolls import Rolls
 
@@ -42,6 +44,9 @@ class Rolling:
 
     @tasks.loop(hours=1)
     async def rolling(self, rolls_obj: Rolls, channel, prefix, command) -> None:
+        """
+        Rolls the specified number of rolls.
+        """
         print(f"Rolling on {channel.guild.name} with {rolls_obj.rolls} rolls...\n")
         for _ in range(rolls_obj.rolls):
             while True:
@@ -57,40 +62,71 @@ class Rolling:
         rolls_obj.reset_rolls()
 
     # @tasks.loop(count=1) # Uncomment IF errors
-    async def claim_rt(self, channel, prefix: str = "$") -> None:
+    async def claim_rt(self, bot, channel, prefix: str = "$") -> None:
+        """
+        Claims the rt.
+        """
         while True:
             try:
-                await channel.send(f"{prefix}rt")
+                rt_message = await channel.send(f"{prefix}rt")
             except NotFound:
+                continue
+            try:
+                await bot.wait_for(
+                    "reaction_add",
+                    check=lambda reaction, user: reaction.message.id == rt_message.id
+                    and user.id == MUDAE_ID
+                    and str(reaction.emoji) == "✅",
+                    timeout=1,
+                )
+            except TimeoutError:
                 continue
             break
 
         print(f"Claimed rt on {channel.guild.name}\n")
-
-        self.rt.set_cooldown.start()
         self.claim.reset()
+        self.rt.set_cooldown.start()
 
-    async def can_claim(self, channel, prefix: str) -> bool:
+    async def can_claim(self, bot, message, prefix: str) -> bool:
+        """
+        Checks if the bot can claim.
+        """
+        channel = message.channel
+
         if self.claim:
             print(f"You can claim on {channel.guild.name} !!!\n")
             return True
 
         if self.rt:
             print(f"Trying to claim rt on {channel.guild.name} !!!\n")
-            await self.claim_rt(channel, prefix)
+            await self.claim_rt(bot, channel, prefix)
             return True
 
         print(f"You can't claim on {channel.guild.name} :(\n")
         return False
 
     def add_roll(
-        self, rolls: list, message, prefix, minute_reset, shifthour, timezone, uptime
+        self,
+        bot,
+        rolls: list,
+        message,
+        prefix,
+        minute_reset,
+        shifthour,
+        timezone,
+        uptime,
     ) -> None:
         rolls.append(message)
 
         try:
             self.decide_claim.start(
-                message.channel, prefix, minute_reset, shifthour, timezone, uptime
+                bot,
+                message,
+                prefix,
+                minute_reset,
+                shifthour,
+                timezone,
+                uptime,
             )
         except RuntimeError:
             pass
@@ -98,7 +134,8 @@ class Rolling:
     @tasks.loop(count=1)
     async def decide_claim(
         self,
-        channel,
+        bot,
+        message,
         prefix: str,
         minute_reset: int,
         shifthour: int,
@@ -106,11 +143,11 @@ class Rolling:
         uptime: float = 0.0,
     ):
 
-        if not await self.can_claim(channel, prefix):
+        if not await self.can_claim(bot, message, prefix):
             return
 
         await sleep(uptime)
-
+        channel = message.channel
         print(f"Deciding claim for channel {channel.name}")
 
         roll_list = (
@@ -122,16 +159,22 @@ class Rolling:
             return
 
         await Rolls.sort_by_highest_kakera(roll_list)
-        await self.claim_roll(channel, roll_list, minute_reset, shifthour, timezone)
+        await self.claim_roll(roll_list, minute_reset, shifthour, timezone)
 
-    async def claim_roll(
-        self, channel, rolls, minute_reset, shifthour, timezone
-    ) -> None:
+    async def claim_roll(self, rolls, minute_reset, shifthour, timezone) -> None:
+        roll_to_claim = rolls[0]
+        channel = roll_to_claim.channel
+
+        if roll_to_claim.embeds[0].to_dict()["color"] == 6753288:
+            print(
+                f"Someone already claimed {Rolls.get_roll_name_n_series(roll_to_claim)} on {channel.guild.name} :(\n"
+            )
+            return
+
         message = ""
-
         try:
-            await rolls[0].components[0].children[0].click()
-            message = f"{Rolls.get_roll_name_n_series(rolls[0])} claimed on {channel.guild.name}! \n"
+            await roll_to_claim.components[0].children[0].click()
+            message = f"{Rolls.get_roll_name_n_series(roll_to_claim)} claimed on {channel.guild.name}! \n"
             try:
                 self.claim.set_cooldown.start(
                     Cooldown.next_claim(
@@ -143,7 +186,7 @@ class Rolling:
             except RuntimeError:
                 message = f"Trying to set cooldown when already on cooldown on {channel.guild.name} \n"
         except InvalidData:
-            message = f"Failed to claim {Rolls.get_roll_name_n_series(rolls[0])} on {channel.guild.name} :( \n"
+            message = f"Failed to claim {Rolls.get_roll_name_n_series(roll_to_claim)} on {channel.guild.name} :( \n"
 
         print(message)
         self.clean_rolls(channel)
