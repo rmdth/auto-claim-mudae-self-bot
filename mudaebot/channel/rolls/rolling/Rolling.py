@@ -75,9 +75,11 @@ class Rolling:
                 try:
                     await bot.wait_for(
                         "reaction_add",
-                        check=lambda reaction, user: print(reaction, user)
+                        check=lambda reaction, user: print(
+                            str(reaction.emoji) == "✅", user.id == MUDAE_ID
+                        )
                         or (
-                            reaction.message_id == rt_message.id
+                            reaction.message.id == rt_message.id
                             and user.id == MUDAE_ID
                             and str(reaction.emoji) == "✅"
                         ),
@@ -92,7 +94,7 @@ class Rolling:
         self.claim.reset()
         self.rt.set_cooldown.start()
 
-    async def can_claim(self, bot, message, prefix: str) -> bool:
+    async def can_claim(self, bot, message, prefix: str, wish: bool = False) -> bool:
         """
         Checks if the bot can claim.
         """
@@ -102,7 +104,7 @@ class Rolling:
             print(f"You can claim on {channel.guild.name} !!!\n")
             return True
 
-        if self.rt:
+        if self.rt and wish:
             print(f"Trying to claim rt on {channel.guild.name} !!!\n")
             await self.claim_rt(bot, channel, prefix)
             return True
@@ -120,6 +122,7 @@ class Rolling:
         shifthour,
         timezone,
         uptime,
+        wish: bool = False,
     ) -> None:
         rolls.append(message)
 
@@ -132,6 +135,7 @@ class Rolling:
                 shifthour,
                 timezone,
                 uptime,
+                wish,
             )
         except RuntimeError:
             pass
@@ -146,6 +150,7 @@ class Rolling:
         shifthour: int,
         timezone: int,
         uptime: float = 0.0,
+        wish: bool = False,
     ):
 
         channel = message.channel
@@ -154,7 +159,7 @@ class Rolling:
         await sleep(uptime)
         print(f"Deciding claim for channel {channel.name}")
 
-        if not await self.can_claim(bot, message, prefix):
+        if not await self.can_claim(bot, message, prefix, wish):
             return
 
         roll_list = (

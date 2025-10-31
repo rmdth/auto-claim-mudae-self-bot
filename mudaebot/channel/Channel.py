@@ -217,20 +217,20 @@ class Channel:
             await self.kakera_claim(bot, user, message)
             return
 
-        char_name = embed["author"]["name"]
-        description = embed["description"]
+        char_name = Rolls.get_roll_name(message)
+        char_series = Rolls.get_roll_series(message)
 
         if (
             str(user.id) in message.content
             or char_name in self._rolls.wish_list
-            or any(serie in description for serie in self._rolls.wish_series)
+            or char_series in self._rolls.wish_series
         ):
             print(
-                f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to wished_claims.\n"
+                f"Added {char_name} of {char_series} found in {message.guild}: {message.channel.name} to wished_claims.\n"
             )
 
             self.roll_claim(
-                bot, self._rolls.rolling.wished_rolls_being_watched, message
+                bot, self._rolls.rolling.wished_rolls_being_watched, message, wish=True
             )
             return
 
@@ -240,7 +240,7 @@ class Channel:
             message, self._rolls.min_kakera_value
         ):
             print(
-                f"Added {char_name} of {description} found in {message.guild}: {message.channel.name} to regular_claims.\n"
+                f"Added {char_name} of {char_series} found in {message.guild}: {message.channel.name} to regular_claims.\n"
             )
             self.roll_claim(
                 bot, self._rolls.rolling.regular_rolls_being_watched, message
@@ -258,7 +258,7 @@ class Channel:
             bot, message, self._prefix, half=half, delay=self._delay
         )
 
-    def roll_claim(self, bot, rolls, message) -> None:
+    def roll_claim(self, bot, rolls, message, wish: bool = False) -> None:
         self._rolls.rolling.add_roll(
             bot,
             rolls,
@@ -268,4 +268,5 @@ class Channel:
             shifthour=self._shifthour,
             uptime=self._uptime,
             timezone=self._timezone,
+            wish=wish,
         )
