@@ -31,7 +31,7 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 
 ## Known Issues
 
-- When someone else claims first it still believes it claimed.
+- Doesn't claim rt properly.
 
 ## Notes
 
