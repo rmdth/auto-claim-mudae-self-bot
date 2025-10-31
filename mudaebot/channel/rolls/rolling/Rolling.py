@@ -74,15 +74,18 @@ class Rolling:
             while True:
                 try:
                     await bot.wait_for(
-                        "raw_reaction_add",
-                        check=lambda payload: payload.message_id == rt_message.id
-                        and payload.user_id == MUDAE_ID
-                        and str(payload.emoji) == "✅",
-                        timeout=1,
+                        "reaction_add",
+                        check=lambda reaction, user: print(reaction, user)
+                        or (
+                            reaction.message_id == rt_message.id
+                            and user.id == MUDAE_ID
+                            and str(reaction.emoji) == "✅"
+                        ),
+                        timeout=3,
                     )
-                    break
                 except TimeoutError:
                     continue
+                break
             break
 
         print(f"Claimed rt on {channel.guild.name}\n")
@@ -145,12 +148,14 @@ class Rolling:
         uptime: float = 0.0,
     ):
 
-        if not await self.can_claim(bot, message, prefix):
-            return
+        channel = message.channel
+        print(f"Waiting {uptime} to claim on {channel.name}")
 
         await sleep(uptime)
-        channel = message.channel
         print(f"Deciding claim for channel {channel.name}")
+
+        if not await self.can_claim(bot, message, prefix):
+            return
 
         roll_list = (
             self._wished_rolls_being_watched or self._regular_rolls_being_watched
@@ -164,7 +169,7 @@ class Rolling:
         await self.claim_roll(roll_list, minute_reset, shifthour, timezone)
 
     async def claim_roll(self, rolls, minute_reset, shifthour, timezone) -> None:
-        roll_to_claim = rolls[0]
+        roll_to_claim = rolls.pop(0)
         channel = roll_to_claim.channel
 
         if roll_to_claim.embeds[0].to_dict()["color"] == 6753288:
