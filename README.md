@@ -32,6 +32,7 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 ## Known Issues
 
 - Doesn't claim rt properly.
+- Free kakera, costs.
 
 ## Notes
 
