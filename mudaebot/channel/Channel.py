@@ -234,6 +234,10 @@ class Channel:
             )
             return
 
+        print(
+            Cooldown.next_claim(self._timezone, self._minute_reset, self._shifthour),
+            self._last_claim_threshold_in_seconds,
+        )
         if Cooldown.next_claim(
             self._timezone, self._minute_reset, self._shifthour
         ) < self._last_claim_threshold_in_seconds or await Rolls.is_minimum_kakera(
@@ -247,15 +251,15 @@ class Channel:
             )
 
     async def kakera_claim(self, bot, user, message) -> None:
-        half = False
+        to_reduce = 0
         if (
             Rolls.get_roll_kakera_keys(message) > 9
             and user.name in message.embeds[0].to_dict()["footer"]["text"]
         ):
-            half = True
+            to_reduce = self._kakera.cost // 2
 
         await self._kakera.claim(
-            bot, message, self._prefix, half=half, delay=self._delay
+            bot, message, self._prefix, to_reduce=to_reduce, delay=self._delay
         )
 
     def roll_claim(self, bot, rolls, message, wish: bool = False) -> None:

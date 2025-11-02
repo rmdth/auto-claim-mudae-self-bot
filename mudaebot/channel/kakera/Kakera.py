@@ -108,7 +108,7 @@ class Kakera:
         return False
 
     async def claim(
-        self, bot, message, prefix, half: bool = False, delay: float = 0
+        self, bot, message, prefix, to_reduce: int = 0, delay: float = 0
     ) -> None:
         """
         Claims kakera from the given message.
@@ -122,8 +122,7 @@ class Kakera:
         await sleep(delay)
         print(f"Waiting {delay} to claim kakera on {channel.guild.name}.\n")
 
-        # I don't know if Mudae rounds to floor or ceil.
-        cost = self._cost // 2 if half else self._cost
+        cost = self._cost - to_reduce
 
         if not await self.can_claim(bot, channel, cost, prefix):
             print(f"Can't claim kakera on {channel.guild.name} :(")

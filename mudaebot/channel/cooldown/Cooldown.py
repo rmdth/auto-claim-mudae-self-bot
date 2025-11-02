@@ -12,7 +12,7 @@ class Cooldown:
     @staticmethod
     def next_claim(timezone=None, minute_reset: int = 0, shifthour: int = 0) -> float:
         if not 0 <= minute_reset <= 59:
-            raise ValueError("minute_   reset must be between 0 and 59 inclusive")
+            raise ValueError("minute_reset must be between 0 and 59 inclusive")
 
         now = datetime.now(tz=timezone)
         shifted_now = now - timedelta(hours=shifthour)
