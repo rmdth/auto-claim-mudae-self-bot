@@ -181,6 +181,7 @@ class Rolling:
             print(
                 f"Someone already claimed {Rolls.get_roll_name_n_series(roll_to_claim)} on {channel.guild.name} :(\n"
             )
+            self.clean_rolls(channel)
             return
 
         message = ""
