@@ -68,7 +68,11 @@ class MudaeBot(discord.Client):
         claim = Channel.get_current_claim(tu)
         if not claim:
             claim = Cooldown(
-                cooldown=Channel.get_msg_time(Channel.get_current_claim_time(tu)),
+                cooldown=Cooldown.next_claim(
+                    self.timezone,
+                    information["settings"]["restart_time_minute"],
+                    information["settings"]["shifthour"],
+                ),
                 max_cooldown=10800,
             )
         else:
