@@ -16,7 +16,7 @@ RT_IN_TU_PATTERN = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
 DK_IN_TU_PATTERN = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
 
 KAKERA_IN_TU_PATTERN = re_compile(r"(\d+)%")
-
+KAKERA_COLOR_PATTERN = re_compile(r":(\w+):")
 KAKERA_DK_CONFIRMATION_PATTERN = re_compile(
     r"\*\*\+\d+\*\*<:kakera:469835869059153940>kakera"
 )
