@@ -4,6 +4,7 @@ from discord.errors import NotFound
 
 from .cooldown.Cooldown import Cooldown
 from .kakera.Kakera import Kakera
+from .kakera.KakeraColors import KakeraColors
 from .rolls.Rolls import Rolls
 
 from ..constants import MUDAE_ID
@@ -229,25 +230,35 @@ class Channel:
                 f"Added {char_name} of {char_series} found in {message.guild}: {message.channel.name} to wished_claims.\n"
             )
 
-            self.roll_claim(
-                bot, self._rolls.rolling.wished_rolls_being_watched, message, wish=True
+            self._rolls.rolling.add_roll(
+                bot=bot,
+                rolls=self._rolls.rolling.wished_rolls_being_watched,
+                message=message,
+                prefix=self._prefix,
+                minute_reset=self._minute_reset,
+                shifthour=self._shifthour,
+                timezone=self._timezone,
+                uptime=self._uptime,
             )
             return
 
-        print(
-            Cooldown.next_claim(self._timezone, self._minute_reset, self._shifthour),
-            self._last_claim_threshold_in_seconds,
-        )
         if Cooldown.next_claim(
             self._timezone, self._minute_reset, self._shifthour
-        ) < self._last_claim_threshold_in_seconds or await Rolls.is_minimum_kakera(
+        ) < self._last_claim_threshold_in_seconds or Rolls.is_minimum_kakera(
             message, self._rolls.min_kakera_value
         ):
             print(
                 f"Added {char_name} of {char_series} found in {message.guild}: {message.channel.name} to regular_claims.\n"
             )
-            self.roll_claim(
-                bot, self._rolls.rolling.regular_rolls_being_watched, message
+            self._rolls.rolling.add_roll(
+                bot=bot,
+                rolls=self._rolls.rolling.regular_rolls_being_watched,
+                message=message,
+                prefix=self._prefix,
+                minute_reset=self._minute_reset,
+                shifthour=self._shifthour,
+                timezone=self._timezone,
+                uptime=self._uptime,
             )
 
     async def kakera_claim(self, bot, user, message) -> None:
@@ -260,17 +271,4 @@ class Channel:
 
         await self._kakera.claim(
             bot, message, self._prefix, to_reduce=to_reduce, delay=self._delay
-        )
-
-    def roll_claim(self, bot, rolls, message, wish: bool = False) -> None:
-        self._rolls.rolling.add_roll(
-            bot,
-            rolls,
-            message=message,
-            prefix=self._prefix,
-            minute_reset=self._minute_reset,
-            shifthour=self._shifthour,
-            uptime=self._uptime,
-            timezone=self._timezone,
-            wish=wish,
         )
