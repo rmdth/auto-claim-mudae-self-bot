@@ -58,15 +58,15 @@ class Rolls:
         )
 
     @staticmethod
-    async def is_minimum_kakera(message, value) -> bool:
+    def is_minimum_kakera(message, value) -> bool:
         return Rolls.get_roll_kakera(message) >= value
 
     @staticmethod
-    async def was_claimed(message) -> bool:
+    def was_claimed(message) -> bool:
         return message.embeds[0].to_dict()["color"] == 6753288
 
     @classmethod
-    async def sort_by_highest_kakera(cls, rolls: list) -> None:
+    def sort_by_highest_kakera(cls, rolls: list) -> None:
         rolls.sort(reverse=True, key=lambda roll: cls.get_roll_kakera(roll))
 
     def __init__(
