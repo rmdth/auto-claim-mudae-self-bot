@@ -1,3 +1,6 @@
+from ...patterns import KAKERA_COLOR_PATTERN
+
+
 class KakeraColors:
     _PRIORITY: dict[str, int] = {
         "kakera": 9,
@@ -11,6 +14,10 @@ class KakeraColors:
         "kakeraP": 1,
     }
     _DEFAULT_PRIORITY: int = _PRIORITY["kakera"] + 1
+
+    @staticmethod
+    def get_color(emoji_name: str) -> str:
+        return KAKERA_COLOR_PATTERN.findall(emoji_name)[0]
 
     def __init__(self, color: str = "kakera") -> None:
         self._color: str = color
