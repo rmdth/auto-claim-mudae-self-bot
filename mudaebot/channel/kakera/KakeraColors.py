@@ -1,22 +1,26 @@
 class KakeraColors:
     _PRIORITY: dict[str, int] = {
-        "": 8,
-        "T": 7,
-        "G": 6,
-        "Y": 5,
-        "O": 4,
-        "R": 3,
-        "W": 2,
-        "L": 1,
-        "P": 0,
+        "kakera": 9,
+        "kakeraT": 8,
+        "kakeraG": 7,
+        "kakeraY": 6,
+        "kakeraO": 5,
+        "kakeraR": 4,
+        "kakeraW": 3,
+        "kakeraL": 2,
+        "kakeraP": 1,
     }
-    _DEFAULT_PRIORITY: int = _PRIORITY[""] + 1
+    _DEFAULT_PRIORITY: int = _PRIORITY["kakera"] + 1
 
-    def __init__(self, color: str = "") -> None:
-        self.color = color.upper()
+    def __init__(self, color: str = "kakera") -> None:
+        self._color: str = color
+
+    @property
+    def color(self) -> str:
+        return self._color
 
     def priority(self) -> int:
-        return self._PRIORITY.get(self.color, self._DEFAULT_PRIORITY)
+        return self._PRIORITY.get(self._color, self._DEFAULT_PRIORITY)
 
     def __lt__(self, other: "KakeraColors") -> bool:
         return self.priority() < other.priority()
