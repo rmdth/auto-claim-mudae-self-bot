@@ -1,3 +1,5 @@
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/downloads/)
+
 # Auto-Claim-Mudae-Self-Bot
 
 ## Disclaimer
@@ -26,7 +28,6 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 ## Cool things to add
 
 - Adjust to different restart claims. Currently I dont know how does the 120 minute claim works to make it.
-- Currently is made for kakera value efficiency. It would be cool to use rt only for wished ones or have different modes if there are any.
 - Tests.
 - Maybe Inherit from the discord.TextChannel or the actual Abstract Class to Channel, so when it takes a channel as a parameter it can be a channel object you don't have to provide prefix, minute_reset and those stuff.
 - Make Kakera claims the same as rolls, so it can sort them.
@@ -94,8 +95,8 @@ Each `[[channels_information]]` block is one channel (copy it to add more):
   - `command`: Command you want to roll.
   - `shifthour`: Server `$shifthour` value.
   - `restart_time_minute`: Minute where rolls restart.
-  - `uptime`: Delay you want for roll claims.
-  - `delay`: Delay you want for kakera claims.
+  - `delay_rolls`: Delay you want for roll claims.
+  - `delay_kakera`: Delay you want for kakera claims.
   - `max_rt_cooldown_in_seconds`: Cooldown threshold before trying `$rt` again. Make sure to adjust it based on your own cooldown
   - `kakera_power_total`: Your total kakera power.
   - `wish_list`: Characters to always claim. _Case sensitive_.
