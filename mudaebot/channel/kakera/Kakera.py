@@ -72,9 +72,16 @@ class Kakera:
             try:
                 await bot.wait_for(
                     "message",
-                    check=lambda message: message.channel.id == channel.id
-                    and message.author.id == MUDAE_ID
-                    and KAKERA_DK_CONFIRMATION_PATTERN.match(message.content),
+                    check=lambda message: (
+                        message.channel.id == channel.id
+                        and message.author.id == MUDAE_ID
+                        and KAKERA_DK_CONFIRMATION_PATTERN.match(message.content)
+                    )
+                    or (
+                        message.channel.id == channel.id
+                        and message.author.id == MUDAE_ID
+                        and "$dk" in message.content
+                    ),
                     timeout=1,
                 )
             except TimeoutError:
