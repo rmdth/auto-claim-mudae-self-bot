@@ -48,7 +48,7 @@ class Channel:
                 "message",
                 check=lambda message: message.channel == channel
                 and message.author.id == MUDAE_ID,
-                timeout=0.5,
+                timeout=1,
             )
         except TimeoutError:
             return None
@@ -156,7 +156,7 @@ class Channel:
         timezone,
         prefix,
         command: str = "mx",
-        uptime: int = 44,
+        delay_rolls: int = 44,
         delay: int = 0,
         shifthour: int = 0,
         minute_reset: int = 30,
@@ -167,7 +167,7 @@ class Channel:
         self._prefix: str = prefix
         self._timezone = timezone
         self._command: str = command
-        self._uptime: int = uptime
+        self._delay_rolls: int = delay_rolls
         self._delay: int = delay
         self._shifthour: int = shifthour
         self._minute_reset: int = minute_reset
@@ -190,8 +190,8 @@ class Channel:
         return self._command
 
     @property
-    def uptime(self) -> int:
-        return self._uptime
+    def delay_rolls(self) -> int:
+        return self._delay_rolls
 
     @property
     def delay(self) -> int:
@@ -238,7 +238,7 @@ class Channel:
                 minute_reset=self._minute_reset,
                 shifthour=self._shifthour,
                 timezone=self._timezone,
-                uptime=self._uptime,
+                delay_rolls=self._delay_rolls,
             )
             return
 
@@ -258,7 +258,7 @@ class Channel:
                 minute_reset=self._minute_reset,
                 shifthour=self._shifthour,
                 timezone=self._timezone,
-                uptime=self._uptime,
+                delay_rolls=self._delay_rolls,
             )
 
     async def kakera_claim(self, bot, user, message) -> None:

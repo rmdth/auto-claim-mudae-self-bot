@@ -94,7 +94,7 @@ class Rolling:
         self.claim.reset()
         self.rt.set_cooldown.start()
 
-    async def available_claim(self, channel) -> str:
+    def available_claim(self, channel, wish: bool) -> str:
         """
         Checks if the bot can claim.
         """
@@ -102,8 +102,8 @@ class Rolling:
             print(f"You can claim on {channel.guild.name} !!!\n")
             return "claim"
 
-        if self.rt:
-            print(f"Available rt on {channel.guild.name} \n")
+        if self.rt and wish:
+            print(f"You have rt on {channel.guild.name} \n")
             return "rt"
 
         print(f"You can't claim on {channel.guild.name} :(\n")
@@ -118,8 +118,7 @@ class Rolling:
         minute_reset,
         shifthour,
         timezone,
-        uptime,
-        wish: bool = False,
+        delay_rolls,
     ) -> None:
         rolls.append(message)
 
@@ -131,7 +130,7 @@ class Rolling:
                 minute_reset,
                 shifthour,
                 timezone,
-                uptime,
+                delay_rolls=delay_rolls,
             )
         except RuntimeError:
             pass
@@ -145,22 +144,14 @@ class Rolling:
         minute_reset: int,
         shifthour: int,
         timezone: int,
-        uptime: float = 0.0,
+        delay_rolls: float = 0.0,
     ):
-
         channel = message.channel
-        print(f"Waiting {uptime} to claim on {channel.name}")
-        await sleep(uptime)
-        if not (claim := await self.available_claim(channel)):
-            return
+
+        print(f"Waiting {delay_rolls} to claim on {channel.name}")
+        await sleep(delay_rolls)
         await self.prepare_rolls(
-            bot,
-            channel,
-            minute_reset,
-            shifthour,
-            prefix,
-            timezone,
-            claim,
+            bot, channel, minute_reset, shifthour, prefix, timezone
         )
 
     async def prepare_rolls(
@@ -171,27 +162,26 @@ class Rolling:
         shifthour,
         prefix,
         timezone,
-        claim: str,
         already_sorted: bool = False,
     ) -> None:
-        if self._wished_rolls_being_watched:
-            roll_list = self._wished_rolls_being_watched
-            wish = True
-        elif self._regular_rolls_being_watched:
-            roll_list = self._regular_rolls_being_watched
-            wish = False
-        else:
+        roll_list = (
+            self._wished_rolls_being_watched or self._regular_rolls_being_watched
+        )
+
+        if not roll_list:
             print(f"Nothing to claim on {channel.name} :( \n")
+            return
+
+        claim = self.available_claim(channel, bool(self._wished_rolls_being_watched))
+        if not claim:
+            self.clean_rolls(channel)
             return
 
         if not already_sorted:
             Rolls.sort_by_highest_kakera(roll_list)
 
-        if claim == "rt" and wish:
-            await self.claim_rt(bot, channel, prefix)
-
         await self.claim_roll(
-            bot, roll_list, minute_reset, shifthour, prefix, timezone, claim, wish
+            bot, roll_list, minute_reset, shifthour, prefix, timezone, claim
         )
 
     async def claim_roll(
@@ -203,31 +193,30 @@ class Rolling:
         prefix: str,
         timezone: int,
         claim: str,
-        wish: bool,
     ) -> None:
         roll_to_claim = rolls.pop(0)
         channel = roll_to_claim.channel
 
-        if Rolls.was_claimed(roll_to_claim):
+        if Rolls.was_claimed(roll_to_claim) and (
+            self._wished_rolls_being_watched or self._regular_rolls_being_watched
+        ):
             print(
                 f"Someone already claimed {Rolls.get_roll_name_n_series(roll_to_claim)} on {channel.guild.name} :(\n"
             )
-            print(f"Trying to claim another roll on {channel.guild.name}...")
-            await self.prepare_rolls(
+            print(f"Trying to claim the next wish on {channel.guild.name}...")
+            await self.claim_roll(
                 bot,
-                channel,
+                self._wished_rolls_being_watched or self._regular_rolls_being_watched,
                 minute_reset,
                 shifthour,
                 prefix,
                 timezone,
                 claim,
-                already_sorted=True,
             )
             return
 
-        if claim == "rt" and not wish:
-            self.clean_rolls(channel)
-            return
+        if claim == "rt":
+            await self.claim_rt(bot, channel, prefix)
 
         message = ""
         try:
@@ -248,16 +237,18 @@ class Rolling:
 
         print(message)
 
-        if claim == "claim" and wish and rolls:
-            await self.prepare_rolls(
-                bot,
-                channel,
-                minute_reset,
-                shifthour,
-                prefix,
-                timezone,
-                claim,
-                already_sorted=True,
+        if claim == "claim" and self._wished_rolls_being_watched and self.rt:
+            print(
+                f"Trying to see if the next wish can be claimed with rt on {channel.guild.name}..."
+            )
+            await self.claim_roll(
+                bot=bot,
+                rolls=self._wished_rolls_being_watched,
+                minute_reset=minute_reset,
+                shifthour=shifthour,
+                prefix=prefix,
+                timezone=timezone,
+                claim="rt",
             )
 
         self.clean_rolls(channel)
