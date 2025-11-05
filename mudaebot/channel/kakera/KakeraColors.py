@@ -1,6 +1,3 @@
-from ...patterns import KAKERA_COLOR_PATTERN
-
-
 class KakeraColors:
     _PRIORITY: dict[str, int] = {
         "kakera": 9,
@@ -16,18 +13,13 @@ class KakeraColors:
     _DEFAULT_PRIORITY: int = _PRIORITY["kakera"] + 1
 
     @staticmethod
-    def get_color(emoji_name: str) -> str:
-        return KAKERA_COLOR_PATTERN.findall(emoji_name)[0]
+    def get_priority(color: str) -> int:
+        return KakeraColors._PRIORITY.get(color, KakeraColors._DEFAULT_PRIORITY)
 
-    def __init__(self, color: str = "kakera") -> None:
-        self._color: str = color
-
-    @property
-    def color(self) -> str:
-        return self._color
-
-    def priority(self) -> int:
-        return self._PRIORITY.get(self._color, self._DEFAULT_PRIORITY)
-
-    def __lt__(self, other: "KakeraColors") -> bool:
-        return self.priority() < other.priority()
+    @staticmethod
+    def sort_by_highest_value(kakeras: list) -> None:
+        kakeras.sort(
+            key=lambda message: KakeraColors.get_priority(
+                message.components[0].children[0].emoji.name
+            )
+        )
