@@ -211,7 +211,7 @@ class Kakera:
         """
         KakeraColors.sort_by_highest_value(self.kakera_being_watched)
 
-        await self.claim(bot, user, prefix)
+        await self.claim(bot, user, message.channel, prefix)
         self.clean_kakeras(message.channel)
 
     def can_claim(self, bot, channel, cost, prefix) -> bool:
@@ -249,27 +249,28 @@ class Kakera:
         )
         return False
 
-    async def claim(self, bot, user, prefix):
+    async def claim(self, bot, user, channel, prefix):
         """
         Claims kakera from the given message.
 
         Args:
             bot (discord.ext.commands.Bot): The bot client.
             user (discord.User): You.
+            channel (discord.TextChannel): The channel where the kakera is.
             prefix (str): The prefix to use on the server.
 
         Returns:
             None
         """
+        if not self._kakera_being_watched:
+            print(f"There is no more kakera on {channel.guild.name}.\n")
+            return
+
         message = self.kakera_being_watched.pop(0)
-        channel = message.channel
 
         cost = Kakera.get_cost(user, message, self.cost)
 
         if not self.can_claim(bot, channel, cost, prefix):
-            return
-        elif not self._kakera_being_watched:
-            print(f"There is no more kakera on {channel.guild.name}.\n")
             return
 
         # I don't know what causes this, that's why im not putting While True
@@ -282,7 +283,7 @@ class Kakera:
         print(f"Claimed Kakera on {channel.guild.name}.\n")
         self -= cost
 
-        await self.claim(bot, user, prefix)
+        await self.claim(bot, user, channel, prefix)
 
     def clean_kakeras(self, channel) -> None:
         """
