@@ -17,8 +17,10 @@ class Rolling:
     ) -> None:
         """
         Initializes and instance of Rolling.
-        :param claim: Cooldown object for the claim
-        :param rt: Cooldown object for the rt
+
+        Args:
+            claim (Cooldown): Cooldown object for the claim.
+            rt (Cooldown): Cooldown object for the rt.
         """
         self._claim: Cooldown = claim
         self._rt: Cooldown = rt
@@ -46,8 +48,14 @@ class Rolling:
     async def rolling(self, rolls_obj: Rolls, channel, prefix, command) -> None:
         """
         Rolls the specified number of rolls.
+
+        Args:
+            rolls_obj (Rolls): The Rolls object.
+            channel (discord.TextChannel): The Discord channel to roll in.
+            prefix (str): The prefix being used on the server.
+            command (str): The command to roll.
         """
-        print(f"Rolling on {channel.guild.name} with {rolls_obj.rolls} rolls...\n")
+        print(f"Rolling on {channel.guild.name} with {rolls_obj.rolls} rolls...")
         for _ in range(rolls_obj.rolls):
             while True:
                 try:
@@ -65,7 +73,13 @@ class Rolling:
     async def claim_rt(self, bot, channel, prefix: str = "$") -> None:
         """
         Claims the rt.
+
+        Args:
+            bot (discord.Client): The Discord bot instance.
+            channel (discord.TextChannel): The Discord channel to claim the rt in.
+            prefix (str): The prefix being used on the server.
         """
+        print(f"Claiming rt on {channel.guild.name}...")
         while True:
             try:
                 rt_message = await channel.send(f"{prefix}rt")
@@ -75,10 +89,7 @@ class Rolling:
                 try:
                     await bot.wait_for(
                         "reaction_add",
-                        check=lambda reaction, user: print(
-                            str(reaction.emoji) == "✅", user.id == MUDAE_ID
-                        )
-                        or (
+                        check=lambda reaction, user: (
                             reaction.message.id == rt_message.id
                             and user.id == MUDAE_ID
                             and str(reaction.emoji) == "✅"
@@ -90,23 +101,31 @@ class Rolling:
                 break
             break
 
-        print(f"Claimed rt on {channel.guild.name}\n")
+        print(f"... Claimed rt on {channel.guild.name}\n")
         self.claim.reset()
         self.rt.set_cooldown.start()
 
     def available_claim(self, channel, wish: bool) -> str:
         """
         Checks if the bot can claim.
+
+        Args:
+            channel (discord.TextChannel): The Discord channel to check.
+            wish (bool): Whether the roll is wished or not.
+
+        Returns:
+            str: The claim type.
         """
+        print(f"Checking if you can claim on {channel.guild.name}...")
         if self.claim:
-            print(f"You can claim on {channel.guild.name} !!!\n")
+            print(f"... You can claim on {channel.guild.name} !!!\n")
             return "claim"
 
         if self.rt and wish:
-            print(f"You have rt on {channel.guild.name} \n")
+            print(f"... You have rt on {channel.guild.name} \n")
             return "rt"
 
-        print(f"You can't claim on {channel.guild.name} :(\n")
+        print(f"... You can't claim on {channel.guild.name} :(\n")
         return ""
 
     def add_roll(
@@ -120,6 +139,19 @@ class Rolling:
         timezone,
         delay_rolls,
     ) -> None:
+        """
+        Adds roll to the given list and starts the check claims loop.
+
+        Args:
+            bot (discord.Client): The Discord bot instance.
+            rolls (list): The list of rolls.
+            message (discord.Message): The message to add.
+            prefix (str): The prefix being used on the server.
+            minute_reset (int): The minute when the claim cooldown resets.
+            shifthour (int): The hour to shift the cooldown.
+            timezone (tzinfo): The timezone of the Client.
+            delay_rolls (float): The delay between rolls.
+        """
         rolls.append(message)
 
         try:
@@ -143,12 +175,24 @@ class Rolling:
         prefix: str,
         minute_reset: int,
         shifthour: int,
-        timezone: int,
+        timezone,
         delay_rolls: float = 0.0,
     ):
+        """
+        Waits given delay before preparing claims.
+
+        Args:
+            bot (discord.Client): The Discord bot instance.
+            message (discord.Message): The message to add.
+            prefix (str): The prefix being used on the server.
+            minute_reset (int): The minute when the claim cooldown resets.
+            shifthour (int): The hour to shift the cooldown.
+            timezone (tzinfo): The timezone of the Client.
+            delay_rolls (float): The delay between rolls.
+        """
         channel = message.channel
 
-        print(f"Waiting {delay_rolls} to claim on {channel.name}")
+        print(f"Waiting {delay_rolls} to claim on {channel.name}. \n")
         await sleep(delay_rolls)
         await self.prepare_rolls(
             bot, channel, minute_reset, shifthour, prefix, timezone
@@ -164,6 +208,19 @@ class Rolling:
         timezone,
         already_sorted: bool = False,
     ) -> None:
+        """
+        Checks if there are claims, if it can claim and sorts them.
+
+        Args:
+            bot (discord.Client): The Discord bot instance.
+            channel (discord.TextChannel): The Discord channel to check.
+            minute_reset (int): The minute when the claim cooldown resets.
+            shifthour (int): The hour to shift the cooldown.
+            prefix (str): The prefix to use for the claim command.
+            timezone (tzinfo): The timezone of the Client.
+            already_sorted (bool): Whether the rolls are already sorted.
+        """
+
         roll_list = (
             self._wished_rolls_being_watched or self._regular_rolls_being_watched
         )
@@ -191,9 +248,21 @@ class Rolling:
         minute_reset: int,
         shifthour: int,
         prefix: str,
-        timezone: int,
+        timezone,
         claim: str,
     ) -> None:
+        """
+        Claims the roll.
+
+        Args:
+            bot (discord.Client): The Discord bot instance.
+            rolls (list): The list of rolls.
+            minute_reset (int): The minute when the claim cooldown resets.
+            shifthour (int): The hour to shift the cooldown.
+            prefix (str): The prefix being used on the server.
+            timezone (tzinfo): The timezone of the Client.
+            claim (str): The claim type.
+        """
         roll_to_claim = rolls.pop(0)
         channel = roll_to_claim.channel
 
@@ -203,7 +272,7 @@ class Rolling:
             print(
                 f"Someone already claimed {Rolls.get_roll_name_n_series(roll_to_claim)} on {channel.guild.name} :(\n"
             )
-            print(f"Trying to claim the next wish on {channel.guild.name}...")
+            print(f"Trying to claim the next roll on {channel.guild.name}...")
             await self.claim_roll(
                 bot,
                 self._wished_rolls_being_watched or self._regular_rolls_being_watched,
@@ -215,10 +284,13 @@ class Rolling:
             )
             return
 
-        if claim == "rt":
-            await self.claim_rt(bot, channel, prefix)
-
         message = ""
+
+        if claim == "rt" and self.rt:
+            await self.claim_rt(bot, channel, prefix)
+        else:
+            message = "You used rt on ur own, restart the bot"
+
         try:
             await roll_to_claim.components[0].children[0].click()
             message = f"{Rolls.get_roll_name_n_series(roll_to_claim)} claimed on {channel.guild.name}! \n"
@@ -254,6 +326,12 @@ class Rolling:
         self.clean_rolls(channel)
 
     def clean_rolls(self, channel) -> None:
-        print(f"Cleaning rolls on {channel.guild.name}...")
+        """
+        Cleans the rolls.
+
+        Args:
+            channel (discord.TextChannel): The Discord channel you are cleaning rolls on.
+        """
         self._regular_rolls_being_watched.clear()
         self._wished_rolls_being_watched.clear()
+        print(f"Cleaned rolls on {channel.name}.\n")

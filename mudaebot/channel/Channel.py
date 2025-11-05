@@ -145,7 +145,7 @@ class Channel:
                 kakera in message.components[0].children[0].emoji.name
                 for kakera in wish_kakera
             ):
-                return "kakera"
+                return str(message.components[0].children[0].emoji.name)
 
         return "roll"
 
@@ -157,7 +157,7 @@ class Channel:
         prefix,
         command: str = "mx",
         delay_rolls: int = 44,
-        delay: int = 0,
+        delay_kakera: int = 0,
         shifthour: int = 0,
         minute_reset: int = 30,
         last_claim_threshold_in_seconds: int = 3600,
@@ -168,7 +168,7 @@ class Channel:
         self._timezone = timezone
         self._command: str = command
         self._delay_rolls: int = delay_rolls
-        self._delay: int = delay
+        self._delay_kakera: int = delay_kakera
         self._shifthour: int = shifthour
         self._minute_reset: int = minute_reset
         self._last_claim_threshold_in_seconds: int = last_claim_threshold_in_seconds
@@ -195,7 +195,7 @@ class Channel:
 
     @property
     def delay(self) -> int:
-        return self._delay
+        return self._delay_kakera
 
     @property
     def shifthour(self) -> int:
@@ -214,8 +214,8 @@ class Channel:
         if not roll_type:
             return
 
-        if roll_type == "kakera":
-            await self.kakera_claim(bot, user, message)
+        if "kakera" in roll_type:
+            self.add_kakera(bot, user, message)
             return
 
         char_name = Rolls.get_roll_name(message)
@@ -261,14 +261,11 @@ class Channel:
                 delay_rolls=self._delay_rolls,
             )
 
-    async def kakera_claim(self, bot, user, message) -> None:
-        to_reduce = 0
-        if (
-            Rolls.get_roll_kakera_keys(message) > 9
-            and user.name in message.embeds[0].to_dict()["footer"]["text"]
-        ):
-            to_reduce = self._kakera.cost // 2
-
-        await self._kakera.claim(
-            bot, message, self._prefix, to_reduce=to_reduce, delay=self._delay
+    def add_kakera(self, bot, user, message) -> None:
+        self._kakera.append(
+            bot,
+            user,
+            message,
+            self._prefix,
+            delay_kakera=self._delay_kakera,
         )
