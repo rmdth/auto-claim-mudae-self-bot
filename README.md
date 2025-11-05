@@ -18,10 +18,11 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 - Claims by desired kakera colors.
 - Kakera and Roll claim have their own delay.
 - Last "hour" auto claim based on given time (seconds).
-- Adjust claim kakera cost for your characters with 10+ keys.
+- Adjust claim kakera costs.
 - Checks if dk and rt are available to use them.
 - Only uses rt on wishes.
 - Wishes have priority over regular claims.
+- Sorts by highest kakera value.
 - If the wanted claim was claimed, it will try to claim another based on criteria.
 - Reconnects.
 
@@ -29,13 +30,11 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 
 - Adjust to different restart claims. Currently I dont know how does the 120 minute claim works to make it.
 - Tests.
-- Maybe Inherit from the discord.TextChannel or the actual Abstract Class to Channel, so when it takes a channel as a parameter it can be a channel object you don't have to provide prefix, minute_reset and those stuff.
-- Make Kakera claims the same as rolls, so it can sort them.
+- Maybe Inherit from the discord.TextChannel or the actual Abstract Class to Channel, so when it takes a channel as a parameter it can be a channel object you don't have to provide as args the prefix, minute_reset and those stuff.
 
 ## Known Issues
 
-- Doesn't claim rt properly.
-- Free kakera, costs.
+- Sometimes doesn't claim rt and dk properly.
 
 ## Notes
 
