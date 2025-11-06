@@ -39,11 +39,11 @@ class Rolls:
 
     @staticmethod
     def get_roll_kakera(message) -> int:
-        return int(
-            Rolls.get_kakera_pattern.findall(
-                message.embeds[0].to_dict()["description"]
-            )[0]
-        )
+        match = Rolls.get_kakera_pattern.findall(
+            message.embeds[0].to_dict()["description"]
+        )[0]
+
+        return int(match.replace(".", ""))
 
     @staticmethod
     def get_roll_kakera_keys(message) -> int:
