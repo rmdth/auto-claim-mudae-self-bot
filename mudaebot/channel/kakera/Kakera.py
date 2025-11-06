@@ -188,7 +188,7 @@ class Kakera:
 
         self.kakera_being_watched.append(message)
         print(
-            f"Added {message.components[0].children[0].emoji.name} on {message.channel.name}."
+            f"Added {message.components[0].children[0].emoji.name} on {message.channel.guild.name}."
         )
 
         try:
@@ -296,4 +296,4 @@ class Kakera:
             None
         """
         self.kakera_being_watched.clear()
-        print(f"Cleaned Kakeras on {channel.name}.\n")
+        print(f"Cleaned Kakeras on {channel.guild.name}.\n")
