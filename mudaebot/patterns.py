@@ -21,7 +21,7 @@ KAKERA_DK_CONFIRMATION_PATTERN = re_compile(
     r"\*\*\+\d+\*\*<:kakera:469835869059153940>kakera"
 )
 
-ROLL_KAKERA_PATTERN = re_compile(r"\*\*(\d+)\*\*")
+ROLL_KAKERA_PATTERN = re_compile(r"\*\*(.+)\*\*")
 ROLL_CHAR_PATTERN = re_compile(r"(.+)\s")
 ROLL_SERIES_PATTERN = re_compile(r"(.+)\s")
 KAKERA_KEYS_PATTERN = re_compile(r"\(.+(\d).+\)")
