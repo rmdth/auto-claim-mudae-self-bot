@@ -63,7 +63,7 @@ class Cooldown:
         return not self.on_cooldown
 
     def reset(self) -> None:
-        self.set_cooldown.stop()
+        self.set_cooldown.cancel()
         self.on_cooldown = False
 
     def is_cooldown_less_than(self, tempo: float = HOUR_IN_SECONDS) -> bool:
