@@ -1,12 +1,11 @@
 from asyncio import sleep
 
-from discord.errors import NotFound, InvalidData
+from discord.errors import InvalidData, NotFound
 from discord.ext import tasks
 
+from ....constants import MUDAE_ID
 from ...cooldown.Cooldown import Cooldown
 from ..Rolls import Rolls
-
-from ....constants import MUDAE_ID
 
 
 class Rolling:
@@ -94,7 +93,7 @@ class Rolling:
                             and user.id == MUDAE_ID
                             and str(reaction.emoji) == "✅"
                         ),
-                        timeout=3,
+                        timeout=3.0,
                     )
                 except TimeoutError:
                     continue
@@ -331,6 +330,7 @@ class Rolling:
 
         Args:
             channel (discord.TextChannel): The Discord channel you are cleaning rolls on.
+
         """
         self._regular_rolls_being_watched.clear()
         self._wished_rolls_being_watched.clear()

@@ -1,18 +1,17 @@
 from asyncio import TimeoutError, sleep
 
-from discord.errors import NotFound, InvalidData
+from discord.errors import InvalidData, NotFound
 from discord.ext import tasks
 
-from mudaebot.channel.rolls.Rolls import Rolls
 from mudaebot.channel.kakera.KakeraColors import KakeraColors
+from mudaebot.channel.rolls.Rolls import Rolls
 
 from ...constants import MUDAE_ID
-from ..cooldown.Cooldown import DAY_IN_SECONDS, Cooldown
 from ...patterns import KAKERA_DK_CONFIRMATION_PATTERN
+from ..cooldown.Cooldown import DAY_IN_SECONDS, Cooldown
 
 
 class Kakera:
-
     @staticmethod
     def get_cost(user, message, cost) -> int:
         """
@@ -135,7 +134,7 @@ class Kakera:
                         and message.author.id == MUDAE_ID
                         and "$dk" in message.content
                     ),
-                    timeout=1,
+                    timeout=3.0,
                 )
             except TimeoutError:
                 continue
