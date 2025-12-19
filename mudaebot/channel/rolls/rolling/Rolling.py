@@ -13,6 +13,7 @@ class Rolling:
         self,
         claim: Cooldown,
         rt: Cooldown,
+        daily: Cooldown,
     ) -> None:
         """
         Initializes and instance of Rolling.
@@ -23,6 +24,7 @@ class Rolling:
         """
         self._claim: Cooldown = claim
         self._rt: Cooldown = rt
+        self._daily: Cooldown = daily
 
         self._regular_rolls_being_watched: list = []
         self._wished_rolls_being_watched: list = []
@@ -36,6 +38,10 @@ class Rolling:
         return self._rt
 
     @property
+    def daily(self) -> Cooldown:
+        return self._daily
+
+    @property
     def regular_rolls_being_watched(self) -> list:
         return self._regular_rolls_being_watched
 
@@ -44,7 +50,7 @@ class Rolling:
         return self._wished_rolls_being_watched
 
     @tasks.loop(hours=1)
-    async def rolling(self, rolls_obj: Rolls, channel, prefix, command) -> None:
+    async def rolling(self, bot, rolls_obj: Rolls, channel, prefix, command) -> None:
         """
         Rolls the specified number of rolls.
 
@@ -54,6 +60,8 @@ class Rolling:
             prefix (str): The prefix being used on the server.
             command (str): The command to roll.
         """
+        if self.daily:
+            await self.claim_daily(bot, channel, prefix)
         print(f"Rolling on {channel.guild.name} with {rolls_obj.rolls} rolls...")
         for _ in range(rolls_obj.rolls):
             while True:
@@ -92,6 +100,11 @@ class Rolling:
                             reaction.message.id == rt_message.id
                             and user.id == MUDAE_ID
                             and str(reaction.emoji) == "✅"
+                        )
+                        or (
+                            reaction.message.channel.id == channel.id
+                            and reaction.message.author.id == MUDAE_ID
+                            and "$daily" in reaction.message.content
                         ),
                         timeout=3.0,
                     )
@@ -103,6 +116,35 @@ class Rolling:
         print(f"... Claimed rt on {channel.guild.name}\n")
         self.claim.reset()
         self.rt.set_cooldown.start()
+
+    async def claim_daily(self, bot, channel, prefix: str = "$") -> None:
+        """
+        Claims the daily.
+
+        """
+        print(f"Claiming daily on {channel.guild.name}...")
+        while True:
+            try:
+                rt_message = await channel.send(f"{prefix}daily")
+            except NotFound:
+                continue
+            while True:
+                try:
+                    await bot.wait_for(
+                        "reaction_add",
+                        check=lambda reaction, user: (
+                            reaction.message.id == rt_message.id
+                            and user.id == MUDAE_ID
+                            and str(reaction.emoji) == "✅"
+                        ),
+                        timeout=3.0,
+                    )
+                except TimeoutError:
+                    continue
+                break
+            break
+        print(f"... Claimed daily on {channel.guild.name}\n")
+        self.daily.set_cooldown.start()
 
     def available_claim(self, channel, wish: bool) -> str:
         """
