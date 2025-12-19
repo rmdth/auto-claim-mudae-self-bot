@@ -91,7 +91,13 @@ class Channel:
         [] means available IF len 2 (hours and minutes), len 1 (minutes)
 
         """
-        return Channel.daily_in_tu_pattern.findall(message.content)
+        dirty_list: list[tuple[str, str]] = Channel.daily_in_tu_pattern.findall(
+            message.content
+        )
+
+        if any(dirty_list[0]):
+            return dirty_list
+        return []
 
     @staticmethod
     def get_rt(message) -> list[tuple[str, str]]:

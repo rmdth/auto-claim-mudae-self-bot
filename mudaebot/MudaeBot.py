@@ -76,6 +76,15 @@ class MudaeBot(discord.Client):
         else:
             claim = Cooldown(max_cooldown=10800)
 
+        daily = Channel.get_daily(tu)
+        if not daily:
+            daily = Cooldown(max_cooldown=MAX_MUDAE_COOLDOWN)
+        else:
+            daily = Cooldown(
+                cooldown=Channel.get_msg_time(daily),
+                max_cooldown=MAX_MUDAE_COOLDOWN,
+            )
+
         rt = Channel.get_rt(tu)
         if not rt:
             rt = Cooldown(
@@ -87,7 +96,7 @@ class MudaeBot(discord.Client):
                 max_cooldown=information["settings"]["max_rt_cooldown_in_seconds"],
             )
 
-        rolling = Rolling(claim, rt)
+        rolling = Rolling(claim, rt, daily)
         rolls = Channel.get_rolls(tu)
         rolls = Rolls(
             rolling,
@@ -132,6 +141,7 @@ class MudaeBot(discord.Client):
 
         self.channels[information["id"]].kakera.auto_regen.start()
         self.channels[information["id"]].rolls.rolling.rolling.start(
+            self,
             self.channels[information["id"]].rolls,
             channel,
             self.channels[information["id"]].prefix,
