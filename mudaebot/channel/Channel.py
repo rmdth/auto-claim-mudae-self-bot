@@ -86,7 +86,7 @@ class Channel:
         return Channel.current_claim_time_pattern.findall(message.content)
 
     @staticmethod
-    def get_daily(message) -> list[str]:
+    def get_daily(message) -> list[tuple[str, str]] | None:
         """
         [] means available IF len 2 (hours and minutes), len 1 (minutes)
 
@@ -94,28 +94,28 @@ class Channel:
         return Channel.daily_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    def get_rt(message) -> list[str]:
+    def get_rt(message) -> list[tuple[str, str]]:
         """
         [] means available IF len 2 (hours and minutes), len 1 (minutes)
         """
         return Channel.rt_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    def get_dk(message) -> list[str]:
+    def get_dk(message) -> list[tuple[str, str]]:
         """
         [] means available IF len 2 (hours and minutes), len 1 (minutes)
         """
         return Channel.dk_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    def get_kakera(message) -> list[str]:
+    def get_kakera(message) -> list[tuple[str, str]]:
         """
         [0] = Kakera Value, [1] = Kakera Cost. None means BIGGG EROOR!!!
         """
         return Channel.kakera_in_tu_pattern.findall(message.content)
 
     @staticmethod
-    def get_rolls(message) -> list[str]:
+    def get_rolls(message) -> list[tuple[str, str]]:
         """
         [0] = Current available_regular_claims rolls_for_guilds.
         [1] Could be used to start rolling... But not for now.
