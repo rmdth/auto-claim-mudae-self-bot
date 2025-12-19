@@ -27,8 +27,10 @@ class Channel:
     # Always finds. Only use after checking curr_claim
     current_claim_time_pattern = CURRENT_CLAIM_TIME_PATTERN
 
-    # None means available IF len 2 (hours and minutes), len 1 (minutes)
+    # Always finds and need normalization
     daily_in_tu_pattern = DAILY_IN_TU_PATTERN
+
+    # None means available IF len 2 (hours and minutes), len 1 (minutes)
     rt_in_tu_pattern = RT_IN_TU_PATTERN
     dk_in_tu_pattern = DK_IN_TU_PATTERN
 

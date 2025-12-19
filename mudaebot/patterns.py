@@ -1,7 +1,7 @@
 """Shared regular expression patterns for the Mudae bot."""
 
+from re import MULTILINE
 from re import compile as re_compile
-
 
 FIND_TU_PATTERN = re_compile(r"\*\*=>\*\* \$tuarrange")
 
@@ -11,7 +11,7 @@ CURRENT_ROLLS_IN_TU_PATTERN = re_compile(r"\*\*(\d+)\*\* roll")
 CURRENT_CLAIM_IN_TU_PATTERN = re_compile(r"__(.+)__.+\.")
 CURRENT_CLAIM_TIME_PATTERN = re_compile(r",\D+(\d+)?\D+(\d+).+min")
 
-DAILY_IN_TU_PATTERN = re_compile(r"\$daily\D+(\d\d+)?\D+(\d+)")
+DAILY_IN_TU_PATTERN = re_compile(r"\$daily\D+?(\d+)?\D+?(\d+)?\D+?$", flags=MULTILINE)
 RT_IN_TU_PATTERN = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
 DK_IN_TU_PATTERN = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
 
