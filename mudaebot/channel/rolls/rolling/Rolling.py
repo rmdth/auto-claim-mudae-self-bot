@@ -104,7 +104,7 @@ class Rolling:
                         or (
                             reaction.message.channel.id == channel.id
                             and reaction.message.author.id == MUDAE_ID
-                            and "$daily" in reaction.message.content
+                            and "$rt" in reaction.message.content
                         ),
                         timeout=3.0,
                     )
