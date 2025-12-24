@@ -125,7 +125,7 @@ class Rolling:
         print(f"Claiming daily on {channel.guild.name}...")
         while True:
             try:
-                rt_message = await channel.send(f"{prefix}daily")
+                daily_message = await channel.send(f"{prefix}daily")
             except NotFound:
                 continue
             while True:
@@ -133,7 +133,7 @@ class Rolling:
                     await bot.wait_for(
                         "reaction_add",
                         check=lambda reaction, user: (
-                            reaction.message.id == rt_message.id
+                            reaction.message.id == daily_message.id
                             and user.id == MUDAE_ID
                             and str(reaction.emoji) == "✅"
                         ),
