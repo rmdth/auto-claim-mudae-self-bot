@@ -1,3 +1,4 @@
+from bisect import insort
 from dataclasses import dataclass, field
 from typing import ClassVar
 
@@ -44,18 +45,22 @@ class KakeraStock:
     max_value: int
     curr_value: int
     default_cost: int
+
     dk: Cooldown = field(default_factory=Cooldown)
     seen_units: list[KakeraUnit] = field(default_factory=list)
 
+    def __isub__(self, cost: int) -> "KakeraStock":
+        self.curr_value -= cost
+        return self
+
     def can_afford(self, cost: int) -> bool:
         return self.curr_value >= cost
-
-    def claim(self, cost: int) -> None:
-        self.curr_value = max(0, self.curr_value - cost)
 
     def regen(self) -> None:
         self.curr_value = min(self.max_value, self.curr_value + 1)
 
     def add_unit(self, unit: KakeraUnit) -> None:
-        self.seen_units.append(unit)
-        self.seen_units.sort(key=lambda x: x.priority)
+        insort(self.seen_units, unit, key=lambda x: (x.priority, -x.claim_cost))
+
+    def get_best_one(self) -> KakeraUnit | None:
+        return self.seen_units.pop() if self.seen_units else None
