@@ -17,18 +17,18 @@ class Cooldown:
         self.ready_at = current_time + seconds
 
 
-@dataclass
+@dataclass(frozen=True)
 class KakeraUnit:
     KAKERA_PRIORITY: ClassVar[dict[str, int]] = {
-        "kakera": 9,
-        "kakeraT": 8,
-        "kakeraG": 7,
-        "kakeraY": 6,
+        "kakera": 1,
+        "kakeraT": 2,
+        "kakeraG": 3,
+        "kakeraY": 4,
         "kakeraO": 5,
-        "kakeraR": 4,
-        "kakeraW": 3,
-        "kakeraL": 2,
-        "kakeraP": 1,
+        "kakeraR": 6,
+        "kakeraW": 7,
+        "kakeraL": 8,
+        "kakeraP": 9,
     }
     claim_cost: int
     color: str
@@ -37,7 +37,7 @@ class KakeraUnit:
 
     @property
     def priority(self) -> int:
-        return self.KAKERA_PRIORITY.get(self.color, self.KAKERA_PRIORITY["kakera"] + 1)
+        return self.KAKERA_PRIORITY.get(self.color, self.KAKERA_PRIORITY["kakera"] - 1)
 
 
 @dataclass
