@@ -64,3 +64,45 @@ class KakeraStock:
 
     def get_best_one(self) -> KakeraUnit | None:
         return self.seen_units.pop() if self.seen_units else None
+
+
+@dataclass(frozen=True)
+class Roll:
+    name: str
+    series: str
+    kakera_value: int
+    channel_id: int
+    message_id: int
+
+
+@dataclass
+class Rolling:
+    rolls: int
+    max_rolls: int
+    wish_rolls: list[Roll] = field(default_factory=list)
+    regular_rolls: list[Roll] = field(default_factory=list)
+    claim: Cooldown = field(default_factory=Cooldown)
+    rt: Cooldown = field(default_factory=Cooldown)
+
+    def __isub__(self, amount: int) -> "Rolling":
+        self.rolls = max(0, self.rolls - amount)
+        return self
+
+    def reset(self) -> None:
+        self.rolls = self.max_rolls
+
+
+@dataclass(frozen=True)
+class RollPreferences:
+    wish_chars: list[str]
+    wish_series: list[str]
+
+    min_kakera_value: int
+
+    def is_wished(self, roll: Roll) -> bool:
+        return roll.name in self.wish_chars or roll.series in self.wish_series
+
+    def meets_min_kakera(self, roll: Roll) -> bool:
+        return roll.kakera_value >= self.min_kakera_value
+
+
