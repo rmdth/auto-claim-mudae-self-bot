@@ -2,7 +2,7 @@ from datetime import timedelta, timezone
 
 from tomllib import load
 
-from mudaebot.MudaeBot import MudaeBot
+from src.mudae_bot import MudaeBot
 
 settings = load(open("./bot-settings.toml", "rb"))
 
