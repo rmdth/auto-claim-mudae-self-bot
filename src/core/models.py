@@ -106,3 +106,10 @@ class RollPreferences:
         return roll.kakera_value >= self.min_kakera_value
 
 
+@dataclass(frozen=True)
+class ChannelSettings:
+    prefix: str
+    command: str
+    shifthour: int
+    minute_reset: int
+    delay_rolls: bool
