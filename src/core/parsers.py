@@ -1,5 +1,6 @@
 """Shared regular expression patterns for the Mudae bot."""
 
+from datetime import timedelta
 from re import MULTILINE
 from re import compile as re_compile
 
@@ -33,6 +34,21 @@ def get_current_claim(content: str) -> list[str]:
     Something means available else []
     """
     return _CURRENT_CLAIM_IN_TU_PATTERN.findall(content)
+
+
+def list_to_timedelta(time_list: list[tuple[str, str]]) -> timedelta:
+    time: timedelta = timedelta()
+    if not time_list[0]:
+        return time
+
+    # Weird check because of how the regex works.
+    if not time_list[0][0] == "":
+        time = timedelta(hours=int(time_list[0][0]), minutes=int(time_list[0][1]))
+        return time
+
+    time = timedelta(minutes=int(time_list[0][1]))
+
+    return time
 
 
 def get_current_claim_time(content: str) -> list[tuple[str, str]]:
