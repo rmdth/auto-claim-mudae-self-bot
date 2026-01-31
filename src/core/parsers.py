@@ -1,97 +1,137 @@
-"""Shared regular expression patterns for the Mudae bot."""
-
 from datetime import timedelta
 from re import MULTILINE
 from re import compile as re_compile
+from typing import Any
 
-from src.core.models import Roll
+from discord import Message
 
-_FIND_TU_PATTERN = re_compile(r"\*\*=>\*\* \$tuarrange")
+from src.core.models import Cooldown, KakeraUnit, Roll
 
-_CURRENT_ROLLS_IN_TU_PATTERN = re_compile(r"\*\*(\d+)\*\* roll")
-
-_CURRENT_CLAIM_IN_TU_PATTERN = re_compile(r"__(.+)__.+\.")
-_CURRENT_CLAIM_TIME_PATTERN = re_compile(r",\D+(\d+)?\D+(\d+).+min")
-
-_DAILY_IN_TU_PATTERN = re_compile(r"\$daily\D+?(\d+)?\D+?(\d+)?\D+?$", flags=MULTILINE)
-_RT_IN_TU_PATTERN = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
-_DK_IN_TU_PATTERN = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
-
-_KAKERA_IN_TU_PATTERN = re_compile(r"(\d+)%")
-_KAKERA_COLOR_PATTERN = re_compile(r":(\w+):")
 _KAKERA_DK_CONFIRMATION_PATTERN = re_compile(
     r"\*\*\+\d+\*\*<:kakera:469835869059153940>kakera"
 )
 
+
+_FIND_TU_PATTERN = re_compile(r"\*\*=>\*\* \$tuarrange")
+
+
+def is_tu_message(content: str) -> bool:
+    return bool(_FIND_TU_PATTERN.search(content))
+
+
+_CURRENT_CLAIM_IN_TU_PATTERN = re_compile(r"__(.+)__.+\.")
+
+
+def available_claim(content: str) -> bool:
+    return bool(_CURRENT_CLAIM_IN_TU_PATTERN.findall(content))
+
+
+_CURRENT_CLAIM_TIME_PATTERN = re_compile(r",\D+(\d+)?\D+(\d+).+min")
+
+
+def get_claim_timedelta(content: str) -> timedelta:
+    """
+    Always returns the time. Only use after checking curr_claim_status
+    """
+    hours, minutes = _CURRENT_CLAIM_TIME_PATTERN.findall(content)[0]
+
+    return timedelta(hours=int(hours), minutes=int(minutes))
+
+
+_DAILY_IN_TU_PATTERN = re_compile(r"\$daily\D+?(\d+)?\D+?(\d+)?\D+?$", flags=MULTILINE)
+
+
+def get_daily_timedelta(content: str) -> timedelta:
+    """
+    [] means available IF len 2 (hours and minutes), len 1 (minutes)
+    """
+    hours, minutes = _DAILY_IN_TU_PATTERN.findall(content)[0]
+
+    return timedelta(hours=int(hours), minutes=int(minutes))
+
+
+_RT_IN_TU_PATTERN = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
+
+
+def get_rt_timedelta(content: str) -> timedelta:
+    """
+    [] means available IF len 2 (hours and minutes), len 1 (minutes)
+    """
+    hours, minutes = _RT_IN_TU_PATTERN.findall(content)[0]
+
+    return timedelta(hours=int(hours), minutes=int(minutes))
+
+
+_DK_IN_TU_PATTERN = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
+
+
+def get_dk_timedelta(content: str) -> timedelta:
+    hours, minutes = _DK_IN_TU_PATTERN.findall(content)[0]
+
+    return timedelta(hours=int(hours), minutes=int(minutes))
+
+
+_KAKERA_IN_TU_PATTERN = re_compile(r"(\d+)%")
+
+
+def get_kakera_and_kakera_cost(content: str) -> tuple[str, str]:
+    kakera_value, kakera_cost, _ = _KAKERA_IN_TU_PATTERN.findall(content)[0]
+
+    return kakera_value, kakera_cost
+
+
+_CURRENT_ROLLS_IN_TU_PATTERN = re_compile(r"\*\*(\d+)\*\* roll")
+
+
+def get_rolls(content: str) -> int:
+    return int(_CURRENT_ROLLS_IN_TU_PATTERN.findall(content)[0])
+
+
+def get_tu_information(content: str, current_time: float) -> dict[str, Any]:
+    kakera_value, kakera_cost = get_kakera_and_kakera_cost(content)
+    return {
+        "daily": Cooldown(get_daily_timedelta(content).total_seconds() + current_time),
+        "rt": Cooldown(get_rt_timedelta(content).total_seconds() + current_time),
+        "dk": Cooldown(get_dk_timedelta(content).total_seconds() + current_time),
+        "kakera_value": kakera_value,
+        "kakera_cost": kakera_cost,
+        "rolls": get_rolls(content),
+    }
+
+
 _ROLL_KAKERA_PATTERN = re_compile(r"\*\*(.+)\*\*")
-_ROLL_CHAR_PATTERN = re_compile(r"(.+)\s")
 _ROLL_SERIES_PATTERN = re_compile(r"(.+)\s")
 _ROLL_KEYS_PATTERN = re_compile(r"\(.+(\d).+\)")
 
 
-def get_current_claim(content: str) -> list[str]:
-    """
-    Something means available else []
-    """
-    return _CURRENT_CLAIM_IN_TU_PATTERN.findall(content)
+def create_roll(embed: dict, message: Any) -> Roll:
+    return Roll(
+        name=embed["author"]["name"],
+        series=_ROLL_SERIES_PATTERN.findall(embed["description"])[0],
+        kakera_value=int(
+            _ROLL_KAKERA_PATTERN.findall(embed["description"])[0].replace(".", "")
+        ),
+        key_amount=int((_ROLL_KEYS_PATTERN.findall(embed["description"]) or [0])[0]),
+        message=message,
+    )
 
 
-def list_to_timedelta(time_list: list[tuple[str, str]]) -> timedelta:
-    time: timedelta = timedelta()
-    if not time_list[0]:
-        return time
-
-    # Weird check because of how the regex works.
-    if not time_list[0][0] == "":
-        time = timedelta(hours=int(time_list[0][0]), minutes=int(time_list[0][1]))
-        return time
-
-    time = timedelta(minutes=int(time_list[0][1]))
-
-    return time
+_KAKERA_COLOR_PATTERN = re_compile(r":(\w+):")
 
 
-def get_current_claim_time(content: str) -> list[tuple[str, str]]:
-    """
-    Always returns the time. Only use after checking curr_claim_status
-    """
-    return _CURRENT_CLAIM_TIME_PATTERN.findall(content)
-
-
-def get_daily_cooldown(content: str) -> list[tuple[str, str]] | None:
-    """
-    [] means available IF len 2 (hours and minutes), len 1 (minutes)
-    """
-    poop = _DAILY_IN_TU_PATTERN.findall(content)
-    if any(poop[0]):
-        return poop
-    return []
-
-
-def get_rt_cooldown(content: str) -> list[tuple[str, str]]:
-    """
-    [] means available IF len 2 (hours and minutes), len 1 (minutes)
-    """
-    return _RT_IN_TU_PATTERN.findall(content)
-
-
-def get_dk_cooldown(content: str) -> list[tuple[str, str]]:
-    """
-    [] means available IF len 2 (hours and minutes), len 1 (minutes)
-    """
-    return _DK_IN_TU_PATTERN.findall(content)
-
-
-def get_curr_kakera_and_default_cost(content: str) -> list[tuple[str, str]]:
-    """
-    [0] = Kakera Value, [1] = Kakera Cost. None means BIGGG EROOR!!!
-    """
-    return _KAKERA_IN_TU_PATTERN.findall(content)
-
-
-def get_current_rolls(content: str) -> list[tuple[str, str]]:
-    return _CURRENT_ROLLS_IN_TU_PATTERN.findall(content)
-
-
-def get_kakera_cost(default_cost: int) -> int:
-    return default_cost
+def create_kakera_unit(
+    embed: dict, kakera_cost: int, user_name: str, message: Message
+) -> KakeraUnit:
+    color = message.components[0].children[0].emoji.name
+    cost = get_kakera_cost(
+        embed,
+        kakera_cost,
+        color,
+        int(_ROLL_KEYS_PATTERN.findall(embed["description"])[0]),
+        user_name,
+    )
+    return KakeraUnit(
+        claim_cost=cost,
+        color=color,
+        message=message,
+    )
