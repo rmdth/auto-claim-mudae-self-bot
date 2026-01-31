@@ -71,13 +71,14 @@ class Roll:
     name: str
     series: str
     kakera_value: int
+    key_amount: int
+    kakera_color: str | None
+    footer_bg_color: str | None
     channel_id: int
     message_id: int
 
     def __str__(self) -> str:
-        return (
-            f"{self.name}\n{self.series}\nKeys: {self.key_amount}\n${self.kakera_value}"
-        )
+        return f"{self.name}\n{self.series}\nKeys: {self.key_amount}\n:${self.kakera_value}"
 
 
 @dataclass
