@@ -28,3 +28,16 @@ def next_claim(now: datetime, minute_reset: int = 0, shifthour: int = 0) -> floa
 
     actual_time = time + timedelta(hours=shifthour)
     return (actual_time - now).total_seconds()
+
+
+def get_roll_type(embed: dict, emoji_name: str) -> str:
+    if "image" not in embed or "author" not in embed:
+        return ""
+
+    if "footer" in embed and "text" in embed["footer"]:
+        if "/" in embed["footer"]["text"]:
+            return ""
+        elif "kakera" in emoji_name:
+            return "kakera"
+
+    return "roll"
