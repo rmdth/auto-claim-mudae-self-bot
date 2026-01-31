@@ -74,6 +74,11 @@ class Roll:
     channel_id: int
     message_id: int
 
+    def __str__(self) -> str:
+        return (
+            f"{self.name}\n{self.series}\nKeys: {self.key_amount}\n${self.kakera_value}"
+        )
+
 
 @dataclass
 class Rolling:
@@ -112,4 +117,6 @@ class ChannelSettings:
     command: str
     shifthour: int
     minute_reset: int
-    delay_rolls: bool
+    delay_rolls: float
+    delay_kakera: float
+    last_claim_threshold_in_seconds: float
