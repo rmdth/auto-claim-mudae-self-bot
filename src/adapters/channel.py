@@ -1,6 +1,9 @@
 from asyncio import TimeoutError
+from typing import Any
 
 from discord.errors import NotFound
+
+from src.core.models import ChannelSettings
 
 from ..constants import MUDAE_ID
 from ..patterns import (
@@ -275,3 +278,27 @@ class Channel:
             self._prefix,
             delay_kakera=self._delay_kakera,
         )
+
+
+class MudaeChannel:
+    def __init__(self, discord_channel: Any, settings: ChannelSettings) -> None:
+        self._channel = discord_channel
+        self.settings: ChannelSettings = settings
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._channel, name)
+
+    async def roll(self) -> None:
+        await self._channel.send(f"{self.settings.prefix} {self.settings.command}")
+
+    async def send_tu(self) -> None:
+        await self._channel.send(f"{self.settings.prefix} tu")
+
+    async def claim_dk(self) -> None:
+        await self._channel.send(f"{self.settings.prefix} dk")
+
+    async def claim_rt(self) -> None:
+        await self._channel.send(f"{self.settings.prefix} rt")
+
+    async def claim_daily(self) -> None:
+        await self._channel.send(f"{self.settings.prefix} daily")
