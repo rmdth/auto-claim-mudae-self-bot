@@ -7,18 +7,18 @@ UTC_delta = 0                  # For example VET is UTC-4 so -4
 # Add more channels by copy pasting the entire [[channels_information]]
 [[channels_information]]
 id = 1111111111111111111       # To be more specific the id of the channel to roll in
-[channels_information.settings]
 max_rolls = 10                 # Max roll quantity
 prefix = "$"                   # The prefix of the server
 command = "mx"                 # The command to roll
 shifthour = 0                  # $shifthour of the server
-restart_time_minute = 40       # The minute where the rolls restart
+minute_reset = 40       # The minute where the rolls restart
 delay_rolls = 40               # The delay YOU want for the Roll claims
 delay_kakera = 40              # The delay YOU want for the kakera_power_total claims
 last_claim_threshold_in_seconds = 3600
 # This one varies depending on your kakera loot
-max_rt_cooldown_in_seconds = 72000 
-kakera_power_total = 110
+rt_max_cooldown_in_seconds = 72000
+dk_max_cooldown_in_seconds = 72000
+kakera_max = 110
 wish_list = [                  # Case sensitive
     "Raiden Mei",
     "Zero Two",
@@ -27,35 +27,35 @@ wish_series = ["Naruto", "Pokedex"]
 
 # You can specify the kakera type that will be claimed.
 # "kakera" means any kakera. if you want this don't change it
-# visit https://mudae.fandom.com/wiki/Kakera to see the colors. 
+# visit https://mudae.fandom.com/wiki/Kakera to see the colors.
 # Just add the color initial in uppercase.
-# Example: 
+# Example:
 # wish_kakera = ["kakeraT", "kakeraO"]
 wish_kakera = [
-    "kakera", 
+    "kakera",
     ]
 min_kakera_value = 200 # Any roll with kakera equal or greater than this value will be claimed
 
 # You add more channels by copy pasting the entire [[channels_information]]
 [[channels_information]]
-id = 1111111111111111111 
-[channels_information.settings]
-max_rolls = 10                 
+id = 1111111111111111111
+max_rolls = 10
 prefix = "$"                    # The prefix of the server
-command = "mx"                 
-shifthour = 0                  
-restart_time_minute = 40       
-delay_rolls = 40                    
-delay_kakera = 40                     
+command = "mx"
+shifthour = 0
+minute_reset = 40
+delay_rolls = 40
+delay_kakera = 40
 last_claim_threshold_in_seconds = 3600
-max_rt_cooldown_in_seconds = 72000
-kakera_power_total = 110
-wish_list = [ 
+rt_max_cooldown_in_seconds = 72000
+dk_max_cooldown_in_seconds = 72000
+kakera_max = 110
+wish_list = [
     "Raiden Mei",
     "Zero Two",
 ]
 wish_series = ["Naruto", "Pokedex"]
 wish_kakera = [
-    "kakera", # 
+    "kakera", #
     ]
 min_kakera_value = 200
