@@ -2,10 +2,20 @@ from asyncio import TimeoutError, sleep
 from datetime import datetime, timezone
 from typing import Any, Callable
 
-from discord.errors import NotFound
+from discord.errors import InvalidData, NotFound
+from discord.ext import tasks
+from discord.message import Message
 
 from src.core.constants import MAX_MUDAE_COOLDOWN, MUDAE_ID
-from src.core.models import ChannelSettings, KakeraStock, Rolling
+from src.core.logic import next_claim
+from src.core.models import (
+    ChannelSettings,
+    Cooldown,
+    KakeraStock,
+    KakeraUnit,
+    Roll,
+    Rolling,
+)
 from src.core.parsers import (
     _KAKERA_DK_CONFIRMATION_PATTERN,
     get_tu_information,
