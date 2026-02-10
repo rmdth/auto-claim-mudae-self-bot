@@ -74,10 +74,10 @@ def get_dk_timedelta(content: str) -> timedelta:
 _KAKERA_IN_TU_PATTERN = re_compile(r"(\d+)%")
 
 
-def get_kakera_and_kakera_cost(content: str) -> tuple[str, str]:
+def get_kakera_and_kakera_default_cost(content: str) -> tuple[int, int]:
     kakera_value, kakera_cost, _ = _KAKERA_IN_TU_PATTERN.findall(content)[0]
 
-    return kakera_value, kakera_cost
+    return int(kakera_value), int(kakera_cost)
 
 
 _CURRENT_ROLLS_IN_TU_PATTERN = re_compile(r"\*\*(\d+)\*\* roll")
@@ -88,7 +88,7 @@ def get_rolls(content: str) -> int:
 
 
 def get_tu_information(content: str, current_time: float) -> dict[str, Any]:
-    kakera_value, kakera_cost = get_kakera_and_kakera_cost(content)
+    kakera_value, kakera_cost = get_kakera_and_kakera_default_cost(content)
     return {
         "daily": Cooldown(get_daily_timedelta(content).total_seconds() + current_time),
         "rt": Cooldown(get_rt_timedelta(content).total_seconds() + current_time),
@@ -100,9 +100,9 @@ def get_tu_information(content: str, current_time: float) -> dict[str, Any]:
 
 
 def get_kakera_cost(
-    embed: dict, default_cost: int, bg_color: str, key_amount: int, user_name: str
+    embed: dict, kakera_cost: int, color: str, key_amount: int, user_name: str
 ) -> int:
-    cost = default_cost
+    cost = kakera_cost
     if key_amount > 9 and user_name in embed["footer"]["text"]:
         cost = cost // 2
     return cost
