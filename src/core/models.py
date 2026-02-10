@@ -141,16 +141,25 @@ class Rolling:
 
 @dataclass(frozen=True)
 class RollPreferences:
-    wish_chars: list[str]
-    wish_series: list[str]
-
     min_kakera_value: int
+    wish_list: frozenset[str]
+    wish_series: frozenset[str]
+    wish_kakera: frozenset[str] = frozenset({"kakera"})
 
-    def is_wished(self, roll: Roll) -> bool:
-        return roll.name in self.wish_chars or roll.series in self.wish_series
+    @classmethod
+    def from_dict(cls, data: dict) -> "RollPreferences":
+        set_fields = {"wish_list", "wish_series", "wish_kakera"}
+        cleaned_data = {}
+        for key, value in data.items():
+            if key not in cls.__annotations__:
+                continue
 
-    def meets_min_kakera(self, roll: Roll) -> bool:
-        return roll.kakera_value >= self.min_kakera_value
+            if key in set_fields:
+                cleaned_data[key] = frozenset(value)
+            else:
+                cleaned_data[key] = value
+
+        return cls(**cleaned_data)
 
 
 @dataclass(frozen=True)
