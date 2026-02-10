@@ -24,284 +24,199 @@ from src.core.parsers import (
 from src.core.utils import retry
 
 
-class Channel:
-    find_tu_pattern = FIND_TU_PATTERN
-
-    # Find means available
-    current_claim_in_tu_pattern = CURRENT_CLAIM_IN_TU_PATTERN
-
-    # Always finds. Only use after checking curr_claim
-    current_claim_time_pattern = CURRENT_CLAIM_TIME_PATTERN
-
-    # Always finds and need normalization
-    daily_in_tu_pattern = DAILY_IN_TU_PATTERN
-
-    # None means available IF len 2 (hours and minutes), len 1 (minutes)
-    rt_in_tu_pattern = RT_IN_TU_PATTERN
-    dk_in_tu_pattern = DK_IN_TU_PATTERN
-
-    # [0] = Kakera Value, [1] = Kakera Cost. None means something changed.
-    kakera_in_tu_pattern = KAKERA_IN_TU_PATTERN
-
-    # [0] = Current available_regular_claims rolls_for_guilds.
-    # [1] Could be used to start rolling... Not for now.
-    current_rolls_in_tu_pattern = CURRENT_ROLLS_IN_TU_PATTERN
-
-    @staticmethod
-    async def found_tu(bot, channel):
-        try:
-            last_message = await bot.wait_for(
-                "message",
-                check=lambda message: message.channel == channel
-                and message.author.id == MUDAE_ID,
-                timeout=1,
-            )
-        except TimeoutError:
-            return None
-
-        if Channel.find_tu_pattern.search(last_message.content):
-            return last_message
-
-        return None
-
-    @staticmethod
-    async def get_tu(bot, channel, prefix: str):
-        tu = None
-        while not (tu := await Channel.found_tu(bot, channel)):
-            while True:
-                try:
-                    await channel.send(f"{prefix}tu")
-                except NotFound:
-                    continue
-                break
-
-        return tu
-
-    @staticmethod
-    def get_current_claim(message) -> list[str]:
-        """
-        Something means available else []
-        """
-        return Channel.current_claim_in_tu_pattern.findall(message.content)
-
-    @staticmethod
-    def get_current_claim_time(message) -> list[tuple[str, str]]:
-        """
-        Always returns the time. Only use after checking curr_claim_status
-        """
-        return Channel.current_claim_time_pattern.findall(message.content)
-
-    @staticmethod
-    def get_daily(message) -> list[tuple[str, str]] | None:
-        """
-        [] means available IF len 2 (hours and minutes), len 1 (minutes)
-
-        """
-        dirty_list: list[tuple[str, str]] = Channel.daily_in_tu_pattern.findall(
-            message.content
-        )
-
-        if any(dirty_list[0]):
-            return dirty_list
-        return []
-
-    @staticmethod
-    def get_rt(message) -> list[tuple[str, str]]:
-        """
-        [] means available IF len 2 (hours and minutes), len 1 (minutes)
-        """
-        return Channel.rt_in_tu_pattern.findall(message.content)
-
-    @staticmethod
-    def get_dk(message) -> list[tuple[str, str]]:
-        """
-        [] means available IF len 2 (hours and minutes), len 1 (minutes)
-        """
-        return Channel.dk_in_tu_pattern.findall(message.content)
-
-    @staticmethod
-    def get_kakera(message) -> list[tuple[str, str]]:
-        """
-        [0] = Kakera Value, [1] = Kakera Cost. None means BIGGG EROOR!!!
-        """
-        return Channel.kakera_in_tu_pattern.findall(message.content)
-
-    @staticmethod
-    def get_rolls(message) -> list[tuple[str, str]]:
-        """
-        [0] = Current available_regular_claims rolls_for_guilds.
-        [1] Could be used to start rolling... But not for now.
-        """
-        return Channel.current_rolls_in_tu_pattern.findall(message.content)
-
-    @staticmethod
-    def get_msg_time(tempo: list[tuple[str, str]]) -> int:
-        if not tempo[0]:
-            return 0
-
-        tempo: tuple[str, str] = tempo[0]
-        if not tempo[0] == "":
-            return int(tempo[0]) * 3600 + int(tempo[1]) * 60
-
-        return int(tempo[1]) * 60
-
-    @staticmethod
-    def get_roll_type(message, information, wish_kakera: list[str]) -> str:
-        if "image" not in information or "author" not in information:
-            return ""
-
-        if "footer" in information and "text" in information["footer"]:
-            if "/" in information["footer"]["text"]:
-                return ""
-            elif message.components != [] and any(
-                kakera in message.components[0].children[0].emoji.name
-                for kakera in wish_kakera
-            ):
-                return str(message.components[0].children[0].emoji.name)
-
-        return "roll"
-
+class MudaeChannel:
     def __init__(
         self,
-        kakera,
-        rolls,
-        timezone,
-        prefix,
-        command: str = "mx",
-        delay_rolls: int = 44,
-        delay_kakera: int = 0,
-        shifthour: int = 0,
-        minute_reset: int = 30,
-        last_claim_threshold_in_seconds: int = 3600,
+        discord_channel: Any,
+        settings: ChannelSettings,
     ) -> None:
-        self._kakera: Kakera = kakera
-        self._rolls: Rolls = rolls
-        self._prefix: str = prefix
-        self._timezone = timezone
-        self._command: str = command
-        self._delay_rolls: int = delay_rolls
-        self._delay_kakera: int = delay_kakera
-        self._shifthour: int = shifthour
-        self._minute_reset: int = minute_reset
-        self._last_claim_threshold_in_seconds: int = last_claim_threshold_in_seconds
-
-    @property
-    def kakera(self) -> Kakera:
-        return self._kakera
-
-    @property
-    def rolls(self) -> Rolls:
-        return self._rolls
-
-    @property
-    def prefix(self) -> str:
-        return self._prefix
-
-    @property
-    def command(self) -> str:
-        return self._command
-
-    @property
-    def delay_rolls(self) -> int:
-        return self._delay_rolls
-
-    @property
-    def delay(self) -> int:
-        return self._delay_kakera
-
-    @property
-    def shifthour(self) -> int:
-        return self._shifthour
-
-    @property
-    def minute_reset(self) -> int:
-        return self._minute_reset
-
-    async def should_i_claim(self, bot, user, message) -> None:
-        if not message.embeds:
-            return
-
-        embed = message.embeds[0].to_dict()
-        roll_type = Channel.get_roll_type(message, embed, self._kakera.wish_kakera)
-        if not roll_type:
-            return
-
-        if "kakera" in roll_type:
-            self.add_kakera(bot, user, message)
-            return
-
-        char_name = Rolls.get_roll_name(message)
-        char_series = Rolls.get_roll_series(message)
-
-        if (
-            str(user.id) in message.content
-            or char_name in self._rolls.wish_list
-            or char_series in self._rolls.wish_series
-        ):
-            print(
-                f"Added {char_name} of {char_series} found in {message.guild}: {message.channel.name} to wished_claims.\n"
-            )
-
-            self._rolls.rolling.add_roll(
-                bot=bot,
-                rolls=self._rolls.rolling.wished_rolls_being_watched,
-                message=message,
-                prefix=self._prefix,
-                minute_reset=self._minute_reset,
-                shifthour=self._shifthour,
-                timezone=self._timezone,
-                delay_rolls=self._delay_rolls,
-            )
-            return
-
-        if Cooldown.next_claim(
-            self._timezone, self._minute_reset, self._shifthour
-        ) < self._last_claim_threshold_in_seconds or Rolls.is_minimum_kakera(
-            message, self._rolls.min_kakera_value
-        ):
-            print(
-                f"Added {char_name} of {char_series} found in {message.guild}: {message.channel.name} to regular_claims.\n"
-            )
-            self._rolls.rolling.add_roll(
-                bot=bot,
-                rolls=self._rolls.rolling.regular_rolls_being_watched,
-                message=message,
-                prefix=self._prefix,
-                minute_reset=self._minute_reset,
-                shifthour=self._shifthour,
-                timezone=self._timezone,
-                delay_rolls=self._delay_rolls,
-            )
-
-    def add_kakera(self, bot, user, message) -> None:
-        self._kakera.append(
-            bot,
-            user,
-            message,
-            self._prefix,
-            delay_kakera=self._delay_kakera,
-        )
-
-
-class MudaeChannel:
-    def __init__(self, discord_channel: Any, settings: ChannelSettings) -> None:
         self._channel = discord_channel
         self.settings: ChannelSettings = settings
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._channel, name)
 
+    def set_rolling(self, rolling: Rolling) -> None:
+        self.rolling: Rolling = rolling
+        self._rolling.start()
+
+    def set_kakera_stock(self, kakera_stock: KakeraStock) -> None:
+        self.kakera_stock: KakeraStock = kakera_stock
+
+    def set_mode(
+        self,
+        mode: str,
+        decider: Callable[[str], Callable[[Roll | KakeraUnit, int, bool, str], bool]],
+    ) -> None:
+        self.should_claim: Callable[[Roll | KakeraUnit, int, bool, str], bool] = (
+            decider(mode)
+        )
+
+    @retry(delay=0, exceptions=(NotFound,))
     async def roll(self) -> None:
-        await self._channel.send(f"{self.settings.prefix} {self.settings.command}")
+        await self._channel.send(f"{self.settings.prefix}{self.settings.command}")
 
-    async def send_tu(self) -> None:
-        await self._channel.send(f"{self.settings.prefix} tu")
+    @tasks.loop(hours=1)
+    async def _rolling(self) -> None:
+        for _ in range(self.rolling.rolls):
+            await self.roll()
+            await sleep(0.5)
+        self.rolling.reset()
 
-    async def claim_dk(self) -> None:
-        await self._channel.send(f"{self.settings.prefix} dk")
+    def available_claim(
+        self, unit: KakeraUnit | Roll | None, timezone: timezone
+    ) -> str:
+        if not unit:
+            return ""
+        elif isinstance(unit, KakeraUnit):
+            return self.kakera_stock.available_claim(
+                unit, datetime.now(tz=timezone).timestamp()
+            )
+        elif isinstance(unit, Roll):
+            return self.rolling.available_claim(datetime.now(tz=timezone).timestamp())
 
-    async def claim_rt(self) -> None:
-        await self._channel.send(f"{self.settings.prefix} rt")
+    def add(self, unit: KakeraUnit | Roll, bot: Any, timezone: timezone) -> None:
+        if isinstance(unit, KakeraUnit):
+            self.kakera_stock.add(unit)
+            self._check_kakera.start(bot, timezone)
+            return
 
-    async def claim_daily(self) -> None:
-        await self._channel.send(f"{self.settings.prefix} daily")
+        self.rolling.add(unit)
+
+        try:
+            self._check_rolls.start(bot, timezone)
+        except RuntimeError:
+            pass
+
+    @tasks.loop(count=1)
+    async def _check_kakera(self, bot: Any, timezone: timezone) -> None:
+        await sleep(self.settings.delay_kakera)
+        kakera_to_claim: KakeraUnit = self.kakera_stock.claimable_kakera.pop()
+
+        current_time = datetime.now(tz=timezone).timestamp()
+        if self.kakera_stock.available_claim(
+            kakera_to_claim, current_time
+        ) == "dk" and self.dk.is_ready(current_time):
+            await self.claim_dk(bot, timezone)
+
+        await self.claim_kakera(kakera_to_claim)
+        if self.kakera_stock.claimable_kakera and self.kakera_stock.dk.is_ready(
+            current_time
+        ):
+            candidate = self.kakera_stock.claimable_kakera.pop()
+            if self.should_claim(candidate, 0, False, "dk"):
+                await self.claim_kakera(candidate)
+
+        self.kakera_stock.claimable_kakera.clear()
+
+    @retry(delay=0, exceptions=(NotFound, InvalidData))
+    async def claim_kakera(self, kakera: KakeraUnit) -> None:
+        await kakera.message.components[0].children[0].click()
+        self.kakera_stock -= kakera.claim_cost
+
+    @tasks.loop(count=1)
+    async def _check_rolls(self, bot: Any, timezone: timezone) -> None:
+        await sleep(self.settings.delay_rolls)
+        roll_to_claim: Roll = self.rolling.claimable_rolls.pop()
+        if roll_to_claim.was_claimed:
+            return
+
+        current_time = datetime.now(tz=timezone).timestamp()
+        if self.rolling.available_claim(
+            current_time
+        ) == "rt" and self.rolling.rt.is_ready(current_time):
+            await self.claim_rt(bot, timezone)
+
+        await self.claim_roll(roll_to_claim.message, timezone)
+        if self.rolling.claimable_rolls and self.rolling.rt.is_ready(current_time):
+            candidate = self.rolling.claimable_rolls.pop()
+            if self.should_claim(
+                candidate,
+                self.settings.roll_preferences.min_kakera_value,
+                self.rolling.claim.remaining_seconds(current_time)
+                <= self.settings.last_claim_threshold_in_seconds,
+                "rt",
+            ):
+                await self.claim_roll(candidate.message, timezone)
+        self.rolling.claimable_rolls.clear()
+
+    @retry(delay=0, exceptions=(NotFound, RuntimeError, InvalidData))
+    async def claim_roll(self, roll: Message, timezone: timezone) -> None:
+        await roll.components[0].children[0].click()
+        self.rolling.claim.set_cooldown(
+            next_claim(
+                datetime.now(tz=self._timezone),
+                self.settings.minute_reset,
+                self.settings.shifthour,
+            ),
+            datetime.now(tz=timezone).timestamp(),
+        )
+
+    @retry(delay=0, exceptions=(TimeoutError, NotFound))
+    async def fetch_tu_data(self, bot: Any, current_time: float) -> dict[str, Any]:
+        await self._channel.send(f"{self.settings.prefix}tu")
+
+        tu_message = await bot.wait_for(
+            "message",
+            check=lambda message: message.author.id == MUDAE_ID
+            and message.channel.id == self._channel.id
+            and is_tu_message(message.content),
+            timeout=1.5,
+        )
+
+        return get_tu_information(tu_message.content, current_time)
+
+    @retry(delay=0, exceptions=(TimeoutError, NotFound))
+    async def claim_dk(self, bot, timezone: timezone) -> None:
+        await self._channel.send(f"{self.settings.prefix}dk")
+
+        await bot.wait_for(
+            "message",
+            check=lambda message: message.channel.id == self._channel.id
+            and message.author.id == MUDAE_ID
+            and (
+                _KAKERA_DK_CONFIRMATION_PATTERN.match(message.content)
+                or "dk" in message.content
+            ),
+            timeout=1.0,
+        )
+        self.dk.set_cooldown(
+            self.settings.dk_max_cooldown_in_seconds,
+            datetime.now(tz=timezone).timestamp(),
+        )
+
+    @retry(delay=0, exceptions=(TimeoutError, NotFound))
+    async def claim_rt(self, bot, timezone) -> None:
+        sent_message = await self._channel.send(f"{self.settings.prefix}rt")
+
+        await bot.wait_for(
+            "reaction_add",
+            check=lambda reaction, user: (
+                reaction.message.id == sent_message.id
+                and user.id == MUDAE_ID
+                and str(reaction.emoji) == "✅"
+            ),
+            timeout=1.0,
+        )
+        self.rt.set_cooldown(
+            self.settings.rt_max_cooldown_in_seconds,
+            datetime.now(tz=timezone).timestamp(),
+        )
+
+    @retry(delay=0, exceptions=(TimeoutError, NotFound))
+    async def claim_daily(self, bot: Any, daily: Cooldown, timezone: timezone) -> None:
+        sent_message = await self._channel.send(f"{self.settings.prefix} daily")
+
+        await bot.wait_for(
+            "reaction_add",
+            check=lambda reaction, user: (
+                reaction.message.id == sent_message.id
+                and user.id == MUDAE_ID
+                and str(reaction.emoji) == "✅"
+            ),
+            timeout=1.0,
+        )
+        daily.set_cooldown(
+            MAX_MUDAE_COOLDOWN,
+            datetime.now(tz=timezone).timestamp(),
+        )
