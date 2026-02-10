@@ -2,8 +2,10 @@ from datetime import timedelta, timezone
 
 from tomllib import load
 
+from src.logging import setup_logging
 from src.mudae_bot import MudaeBot
 
+setup_logging()
 settings = load(open("./bot-settings.toml", "rb"))
 
 channels_information = settings["channels_information"]
