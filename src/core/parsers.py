@@ -105,6 +105,8 @@ def get_kakera_cost(
     cost = kakera_cost
     if key_amount > 9 and user_name in embed["footer"]["text"]:
         cost = cost // 2
+    elif color == "kakeraP":
+        cost = 0
     return cost
 
 
