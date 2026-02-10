@@ -2,6 +2,8 @@ from bisect import insort
 from dataclasses import dataclass, field
 from typing import ClassVar
 
+from discord.message import Message
+
 
 @dataclass
 class Cooldown:
@@ -21,23 +23,26 @@ class Cooldown:
 class KakeraUnit:
     KAKERA_PRIORITY: ClassVar[dict[str, int]] = {
         "kakera": 1,
-        "kakeraT": 2,
-        "kakeraG": 3,
-        "kakeraY": 4,
-        "kakeraO": 5,
-        "kakeraR": 6,
-        "kakeraW": 7,
-        "kakeraL": 8,
-        "kakeraP": 9,
+        "kakeraP": 2,
+        "kakeraT": 3,
+        "kakeraG": 4,
+        "kakeraY": 5,
+        "kakeraO": 7,
+        "kakeraR": 8,
+        "kakeraW": 9,
+        "kakeraL": 10,
     }
     claim_cost: int
     color: str
-    channel_id: int
-    message_id: int
+    message: Message
+    wished: bool = False
 
     @property
     def priority(self) -> int:
         return self.KAKERA_PRIORITY.get(self.color, self.KAKERA_PRIORITY["kakera"] - 1)
+
+    def is_wished(self, roll_preferences: "RollPreferences") -> bool:
+        return self.color in roll_preferences.wish_kakera
 
 
 @dataclass
