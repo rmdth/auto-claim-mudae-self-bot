@@ -109,17 +109,34 @@ class Roll:
 class Rolling:
     rolls: int
     max_rolls: int
-    wish_rolls: list[Roll] = field(default_factory=list)
-    regular_rolls: list[Roll] = field(default_factory=list)
+    claimable_rolls: list[Roll] = field(default_factory=list)
     claim: Cooldown = field(default_factory=Cooldown)
     rt: Cooldown = field(default_factory=Cooldown)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Rolling":
+        return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
 
     def __isub__(self, amount: int) -> "Rolling":
         self.rolls = max(0, self.rolls - amount)
         return self
 
+    def available_claim(self, current_time: float) -> str:
+        if self.claim.is_ready(current_time):
+            return "claim"
+        elif self.rt.is_ready(current_time):
+            return "rt"
+        return ""
+
     def reset(self) -> None:
         self.rolls = self.max_rolls
+
+    def add(self, roll: Roll) -> None:
+        insort(
+            self.claimable_rolls,
+            roll,
+            key=lambda x: (x.wished, x.kakera_value),
+        )
 
 
 @dataclass(frozen=True)
