@@ -99,6 +99,13 @@ def get_tu_information(content: str, current_time: float) -> dict[str, Any]:
     }
 
 
+def get_kakera_cost(
+    embed: dict, default_cost: int, bg_color: str, key_amount: int, user_name: str
+) -> int:
+    cost = default_cost
+    if key_amount > 9 and user_name in embed["footer"]["text"]:
+        cost = cost // 2
+    return cost
 _ROLL_KAKERA_PATTERN = re_compile(r"\*\*(.+)\*\*")
 _ROLL_SERIES_PATTERN = re_compile(r"(.+)\s")
 _ROLL_KEYS_PATTERN = re_compile(r"\(.+(\d).+\)")
