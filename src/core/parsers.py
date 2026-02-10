@@ -106,6 +106,22 @@ def get_kakera_cost(
     if key_amount > 9 and user_name in embed["footer"]["text"]:
         cost = cost // 2
     return cost
+
+
+def parse_message(
+    embed: dict,
+    roll_type: str,
+    kakera_cost: int,
+    user_name: str,
+    message: Any,
+) -> Roll | KakeraUnit | None:
+    if roll_type == "roll":
+        return create_roll(embed, message)
+    elif roll_type == "kakera":
+        return create_kakera_unit(embed, kakera_cost, user_name, message)
+    return None
+
+
 _ROLL_KAKERA_PATTERN = re_compile(r"\*\*(.+)\*\*")
 _ROLL_SERIES_PATTERN = re_compile(r"(.+)\s")
 _ROLL_KEYS_PATTERN = re_compile(r"\(.+(\d).+\)")
