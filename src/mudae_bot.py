@@ -1,12 +1,14 @@
+from asyncio import sleep
 from datetime import datetime, timezone
+from random import choice
 
 import discord
 from discord.ext import tasks
 
 from src.adapters.channel import MudaeChannel
-from src.core.constants import MUDAE_ID
+from src.core.constants import MAX_MUDAE_COOLDOWN, MUDAE_ID
 from src.core.logic import get_roll_type
-from src.core.models import ChannelSettings, KakeraStock, Rolling
+from src.core.models import ChannelSettings, Cooldown, KakeraStock, Rolling
 from src.core.parsers import parse_message
 
 
@@ -14,13 +16,21 @@ class MudaeBot(discord.Client):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.timezone: timezone = kwargs.get("timezone", timezone.utc)
-        self.channels_information: dict[int, dict] = kwargs.get(
-            "channels_information", {}
-        )
-        self.channels: dict[int, Channel] = {}
+        self.channels_information: list[dict] = kwargs.get("channels_information", {})
+        self.channels: dict[int, MudaeChannel] = {}
+
+        self.daily: Cooldown = Cooldown()
 
         if not self.channels_information:
             raise ValueError("Channels dictionary is empty.")
+
+    @tasks.loop(hours=1)
+    async def _claim_daily(self) -> None:
+        await sleep(MAX_MUDAE_COOLDOWN)
+
+        await self.channels[choice(list(self.channels.keys()))].claim_daily(
+            self, self.daily, self.timezone
+        )
 
     async def setup_hook(self) -> None:
         self.setup.start()
@@ -35,116 +45,79 @@ class MudaeBot(discord.Client):
         except KeyError:
             return
 
-        if message.author.id != MUDAE_ID:
+        if message.author.id != MUDAE_ID or not message.embeds:
             return
 
-        if message.embeds:
-            await self.channels[message.channel.id].should_i_claim(
-                self, self.user, message
+        embed = message.embeds[0].to_dict()
+        roll_type = get_roll_type(embed, message.components[0].children[0].emoji.name)
+
+        if not (
+            unit := parse_message(
+                embed,
+                roll_type,
+                self.channels[message.channel.id].kakera_stock.kakera_cost,
+                self.user.name,
+                message,
             )
+        ):
+            return
+
+        if not (
+            available_claim := self.channels[message.channel.id].available_claim(
+                unit, self.timezone
+            )
+        ):
+            return
+
+        if not self.channels[message.channel.id].should_claim(
+            unit,
+            self.channels[
+                message.channel.id
+            ].settings.roll_preferences.min_kakera_value,
+            self.channels[message.channel.id].rolling.claim.remaining_seconds(
+                datetime.now(tz=self.timezone).timestamp()
+            )
+            <= self.channels[
+                message.channel.id
+            ].settings.last_claim_threshold_in_seconds,
+            available_claim,
+        ):
+            return
+
+        self.channels[message.channel.id].add(unit, self, self.timezone)
 
     @tasks.loop(count=1)
     async def setup(self) -> None:
-        for information in self.channels_information.values():
-            await self.setup_channels(information)
+        for settings in self.channels_information:
+            id = settings["id"]
+            discord_channel = self.get_channel(id)
 
-    async def setup_channels(self, information: dict) -> None:
-        channel = self.get_channel(information["id"])
+            if discord_channel is None:
+                print(f"Channel {id} not found.")
+                continue
 
-        if channel is None:
-            print(f"Channel {information['id']} not found.")
-            return
-
-        tu = await Channel.get_tu(
-            self,
-            channel,
-            information["settings"]["prefix"],
-        )
-
-        claim = Channel.get_current_claim(tu)
-        if not claim:
-            claim = Cooldown(
-                cooldown=Cooldown.next_claim(
-                    self.timezone,
-                    information["settings"]["restart_time_minute"],
-                    information["settings"]["shifthour"],
-                ),
-                max_cooldown=10800,
+            mudae_channel = MudaeChannel(
+                discord_channel, ChannelSettings.from_dict(settings)
             )
-        else:
-            claim = Cooldown(max_cooldown=10800)
+            self.channels[id] = mudae_channel
 
-        daily = Channel.get_daily(tu)
-        if not daily:
-            daily = Cooldown(max_cooldown=MAX_MUDAE_COOLDOWN)
-        else:
-            daily = Cooldown(
-                cooldown=Channel.get_msg_time(daily),
-                max_cooldown=MAX_MUDAE_COOLDOWN,
+            data = await mudae_channel.fetch_tu_data(
+                self, datetime.now(tz=self.timezone).timestamp()
             )
+            data["max_rolls"] = settings["max_rolls"]
+            data["kakera_max"] = settings["kakera_max"]
 
-        rt = Channel.get_rt(tu)
-        if not rt:
-            rt = Cooldown(
-                max_cooldown=information["settings"]["max_rt_cooldown_in_seconds"]
-            )
-        else:
-            rt = Cooldown(
-                cooldown=Channel.get_msg_time(rt),
-                max_cooldown=information["settings"]["max_rt_cooldown_in_seconds"],
-            )
+            kakera_stock = KakeraStock.from_dict(data)
+            rolling = Rolling.from_dict(data)
 
-        rolling = Rolling(claim, rt, daily)
-        rolls = Channel.get_rolls(tu)
-        rolls = Rolls(
-            rolling,
-            information["settings"]["wish_list"],
-            information["settings"]["wish_series"],
-            rolls=int(rolls[0]) if rolls else 0,
-            max_rolls=information["settings"]["max_rolls"],
-            min_kakera_value=information["settings"]["min_kakera_value"],
-        )
+            mudae_channel.set_kakera_stock(kakera_stock)
+            mudae_channel.set_rolling(rolling)
 
-        dk = Channel.get_dk(tu)
-        if not dk:
-            dk = Cooldown(max_cooldown=MAX_MUDAE_COOLDOWN)
-        else:
-            dk = Cooldown(
-                cooldown=Channel.get_msg_time(dk),
-                max_cooldown=MAX_MUDAE_COOLDOWN,
-            )
-
-        kakera = Channel.get_kakera(tu)
-        kakera = Kakera(
-            int(kakera[0]),
-            int(kakera[1]),
-            information["settings"]["kakera_power_total"],
-            dk,
-            information["settings"]["wish_kakera"],
-        )
-
-        self.channels[information["id"]] = Channel(
-            kakera,
-            rolls,
-            self.timezone,
-            information["settings"]["prefix"],
-            information["settings"]["command"],
-            information["settings"]["delay_rolls"],
-            information["settings"]["delay_kakera"],
-            information["settings"]["shifthour"],
-            information["settings"]["restart_time_minute"],
-            information["settings"]["last_claim_threshold_in_seconds"],
-        )
-        await sleep(0.5)
-
-        self.channels[information["id"]].kakera.auto_regen.start()
-        self.channels[information["id"]].rolls.rolling.rolling.start(
-            self,
-            self.channels[information["id"]].rolls,
-            channel,
-            self.channels[information["id"]].prefix,
-            self.channels[information["id"]].command,
-        )
+            self.daily = data["daily"]
+            try:
+                self._claim_daily.start()
+            except RuntimeError:
+                pass
 
     @setup.before_loop
     async def wait_for_ready(self) -> None:
