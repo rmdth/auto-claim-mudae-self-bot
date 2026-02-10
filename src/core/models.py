@@ -171,3 +171,13 @@ class ChannelSettings:
     delay_rolls: float
     delay_kakera: float
     last_claim_threshold_in_seconds: float
+    rt_max_cooldown_in_seconds: float
+    dk_max_cooldown_in_seconds: float
+    roll_preferences: RollPreferences
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ChannelSettings":
+        return cls(
+            **{k: v for k, v in data.items() if k in cls.__annotations__},
+            roll_preferences=RollPreferences.from_dict(data),
+        )
