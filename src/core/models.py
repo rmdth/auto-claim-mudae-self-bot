@@ -47,28 +47,40 @@ class KakeraUnit:
 
 @dataclass
 class KakeraStock:
-    max_value: int
-    curr_value: int
-    default_cost: int
+    kakera_max: int
+    kakera_value: int
+    kakera_cost: int
 
     dk: Cooldown = field(default_factory=Cooldown)
-    seen_units: list[KakeraUnit] = field(default_factory=list)
+    claimable_kakera: list[KakeraUnit] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "KakeraStock":
+        return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
 
     def __isub__(self, cost: int) -> "KakeraStock":
         self.curr_value -= cost
         return self
 
-    def can_afford(self, cost: int) -> bool:
-        return self.curr_value >= cost
+    def available_claim(self, unit: KakeraUnit, current_time: float) -> str:
+        if self.curr_value >= unit.claim_cost:
+            return "claim"
+        elif self.dk.is_ready(current_time):
+            return "dk"
+        return ""
+
+    def reset(self) -> None:
+        self.curr_value = self.kakera_max
 
     def regen(self) -> None:
-        self.curr_value = min(self.max_value, self.curr_value + 1)
+        self.curr_value = min(self.kakera_max, self.curr_value + 1)
 
-    def add_unit(self, unit: KakeraUnit) -> None:
-        insort(self.seen_units, unit, key=lambda x: (x.priority, -x.claim_cost))
-
-    def get_best_one(self) -> KakeraUnit | None:
-        return self.seen_units.pop() if self.seen_units else None
+    def add(self, unit: KakeraUnit) -> None:
+        insort(
+            self.claimable_kakera,
+            unit,
+            key=lambda x: (x.wished, x.priority, -x.claim_cost),
+        )
 
 
 @dataclass(frozen=True)
