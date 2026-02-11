@@ -39,7 +39,7 @@ def get_claim_timedelta(content: str) -> timedelta:
     """
     hours, minutes = _CURRENT_CLAIM_TIME_PATTERN.findall(content)[0]
 
-    return timedelta(hours=int(hours), minutes=int(minutes))
+    return timedelta(hours=int(hours or 0), minutes=int(minutes))
 
 
 _DAILY_IN_TU_PATTERN = re_compile(r"\$daily\D+?(\d+)?\D+?(\d+)?\D+?$", flags=MULTILINE)
@@ -51,7 +51,7 @@ def get_daily_timedelta(content: str) -> timedelta:
     """
     hours, minutes = _DAILY_IN_TU_PATTERN.findall(content)[0]
 
-    return timedelta(hours=int(hours), minutes=int(minutes))
+    return timedelta(hours=int(hours or 0), minutes=int(minutes))
 
 
 _RT_IN_TU_PATTERN = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
@@ -63,7 +63,7 @@ def get_rt_timedelta(content: str) -> timedelta:
     """
     hours, minutes = _RT_IN_TU_PATTERN.findall(content)[0]
 
-    return timedelta(hours=int(hours), minutes=int(minutes))
+    return timedelta(hours=int(hours or 0), minutes=int(minutes))
 
 
 _DK_IN_TU_PATTERN = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
@@ -72,7 +72,7 @@ _DK_IN_TU_PATTERN = re_compile(r"\$dk\D+(\d+)?\D+(\d+)")
 def get_dk_timedelta(content: str) -> timedelta:
     hours, minutes = _DK_IN_TU_PATTERN.findall(content)[0]
 
-    return timedelta(hours=int(hours), minutes=int(minutes))
+    return timedelta(hours=int(hours or 0), minutes=int(minutes))
 
 
 _KAKERA_IN_TU_PATTERN = re_compile(r"(\d+)%")
