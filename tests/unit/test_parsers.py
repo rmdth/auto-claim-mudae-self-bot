@@ -36,3 +36,7 @@ def test_available_claim(tu_message_es) -> None:
 
 def test_get_claim_timedelta(tu_message_es) -> None:
     assert parsers.get_claim_timedelta(tu_message_es) == timedelta(minutes=17)
+
+
+def test_get_daily_timedelta(tu_message_es) -> None:
+    assert parsers.get_daily_timedelta(tu_message_es) == timedelta()
