@@ -61,3 +61,15 @@ def test_get_kakera_and_kakera_default_cost(tu_message_es) -> None:
 def test_get_rolls(tu_message_es) -> None:
     rolls = parsers.get_rolls(tu_message_es)
     assert rolls == 10
+
+
+def test_get_tu_information(tu_message_es) -> None:
+    FIXED_NOW = 1000.0
+
+    result = parsers.get_tu_information(tu_message_es, FIXED_NOW)
+    assert result["daily"].ready_at == pytest.approx(1000.0)
+    assert result["rt"].ready_at == pytest.approx(1000.0)
+    assert result["dk"].ready_at == pytest.approx(1000.0)
+    assert result["kakera_value"] == 110
+    assert result["kakera_cost"] == 36
+    assert result["rolls"] == 10
