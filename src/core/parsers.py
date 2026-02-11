@@ -54,7 +54,7 @@ def get_daily_timedelta(content: str) -> timedelta:
     return timedelta(hours=int(hours or 0), minutes=int(minutes or 0))
 
 
-_RT_IN_TU_PATTERN = re_compile(r"\$rt\D+(\d+)?\D+(\d+)")
+_RT_IN_TU_PATTERN = re_compile(r"\$rt[ (:.a-zA-Z*]+(\d+)?[ (:.a-zA-Z*]+(\d+)?")
 
 
 def get_rt_timedelta(content: str) -> timedelta:
