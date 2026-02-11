@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from re import MULTILINE
 from re import compile as re_compile
@@ -6,6 +7,8 @@ from typing import Any
 from discord import Message
 
 from src.core.models import Cooldown, KakeraUnit, Roll
+
+logger = logging.getLogger(__name__)
 
 _KAKERA_DK_CONFIRMATION_PATTERN = re_compile(
     r"\*\*\+\d+\*\*<:kakera:469835869059153940>kakera"
@@ -16,6 +19,7 @@ _FIND_TU_PATTERN = re_compile(r"\*\*=>\*\* \$tuarrange")
 
 
 def is_tu_message(content: str) -> bool:
+    logger.debug("TU message received is:  %s", content)
     return bool(_FIND_TU_PATTERN.search(content))
 
 
@@ -148,6 +152,7 @@ def create_kakera_unit(
     embed: dict, kakera_cost: int, user_name: str, message: Message
 ) -> KakeraUnit:
     color = message.components[0].children[0].emoji.name
+    logger.debug("kakera color is: %s", color)
     cost = get_kakera_cost(
         embed,
         kakera_cost,
