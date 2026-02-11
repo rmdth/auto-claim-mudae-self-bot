@@ -48,3 +48,11 @@ def test_get_rt_timedelta(tu_message_es) -> None:
 
 def test_get_dk_timedelta(tu_message_es) -> None:
     assert parsers.get_dk_timedelta(tu_message_es) == timedelta()
+
+
+def test_get_kakera_and_kakera_default_cost(tu_message_es) -> None:
+    kakera, kakera_default_cost = parsers.get_kakera_and_kakera_default_cost(
+        tu_message_es
+    )
+    assert kakera == 110
+    assert kakera_default_cost == 36
