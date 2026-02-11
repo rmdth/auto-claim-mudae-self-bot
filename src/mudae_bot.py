@@ -1,3 +1,4 @@
+import logging
 from asyncio import sleep
 from datetime import datetime, timezone
 from random import choice
@@ -10,6 +11,8 @@ from src.core.constants import MAX_MUDAE_COOLDOWN, MUDAE_ID
 from src.core.logic import get_roll_type
 from src.core.models import ChannelSettings, Cooldown, KakeraStock, Rolling
 from src.core.parsers import parse_message
+
+logger = logging.getLogger(__name__)
 
 
 class MudaeBot(discord.Client):
