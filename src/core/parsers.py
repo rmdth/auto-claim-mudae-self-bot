@@ -4,6 +4,7 @@ from re import MULTILINE
 from re import compile as re_compile
 from typing import Any
 
+# TODO Finish settting up logger and commit fix
 from discord import Message
 
 from src.core.models import Cooldown, KakeraUnit, Roll
