@@ -40,7 +40,7 @@ class MudaeBot(discord.Client):
 
     async def on_ready(self) -> None:
         assert self.user is not None
-        print(f"Logged on as {self.user} (ID: {self.user.id})!")
+        logger.info(f"Logged on as {self.user} (ID: {self.user.id})!")
 
     async def on_message(self, message: discord.Message) -> None:
         try:
@@ -96,7 +96,7 @@ class MudaeBot(discord.Client):
             discord_channel = self.get_channel(id)
 
             if discord_channel is None:
-                print(f"Channel {id} not found.")
+                logger.error(f"Channel {id} not found.")
                 continue
 
             mudae_channel = MudaeChannel(
