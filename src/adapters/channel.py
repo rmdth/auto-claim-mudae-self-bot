@@ -1,3 +1,4 @@
+import logging
 from asyncio import TimeoutError, sleep
 from datetime import datetime, timezone
 from typing import Any, Callable
@@ -22,6 +23,8 @@ from src.core.parsers import (
     is_tu_message,
 )
 from src.core.utils import retry
+
+logger = logging.getLogger(__name__)
 
 
 class MudaeChannel:
@@ -58,9 +61,15 @@ class MudaeChannel:
 
     @tasks.loop(hours=1)
     async def _rolling(self) -> None:
+        logger.info(
+            f"Rolling on {self._channel.guild.name} with {self.rolling.rolls} rolls..."
+        )
         for _ in range(self.rolling.rolls):
             await self.roll()
             await sleep(0.5)
+        logger.info(
+            f"Finished rolling on {self._channel.guild.name} with {self.rolling.rolls} rolls."
+        )
         self.rolling.reset()
 
     def available_claim(
@@ -78,10 +87,15 @@ class MudaeChannel:
     def add(self, unit: KakeraUnit | Roll, bot: Any, timezone: timezone) -> None:
         if isinstance(unit, KakeraUnit):
             self.kakera_stock.add(unit)
-            self._check_kakera.start(bot, timezone)
+            logger.info(f"Watching {unit.color} on {self._channel.guild.name}")
+            try:
+                self._check_kakera.start(bot, timezone)
+            except RuntimeError:
+                pass
             return
 
         self.rolling.add(unit)
+        logger.info(f"Watching {unit} on {self._channel.guild.name}")
 
         try:
             self._check_rolls.start(bot, timezone)
@@ -90,6 +104,9 @@ class MudaeChannel:
 
     @tasks.loop(count=1)
     async def _check_kakera(self, bot: Any, timezone: timezone) -> None:
+        logger.info(
+            f"Waiting {self.settings.delay_kakera}s before claiming kakera on {self._channel.guild.name}..."
+        )
         await sleep(self.settings.delay_kakera)
         kakera_to_claim: KakeraUnit = self.kakera_stock.claimable_kakera.pop()
 
@@ -100,12 +117,17 @@ class MudaeChannel:
             await self.claim_dk(bot, timezone)
 
         await self.claim_kakera(kakera_to_claim)
+        logger.info(
+            f"Checking if there is more kakera to claim on {self._channel.guild.name}..."
+        )
+
         if self.kakera_stock.claimable_kakera and self.kakera_stock.dk.is_ready(
             current_time
         ):
             candidate = self.kakera_stock.claimable_kakera.pop()
             if self.should_claim(candidate, 0, False, "dk"):
                 await self.claim_kakera(candidate)
+        logger.info(f"... Can't claim any more kakera on {self._channel.guild.name}.")
 
         self.kakera_stock.claimable_kakera.clear()
 
@@ -113,12 +135,21 @@ class MudaeChannel:
     async def claim_kakera(self, kakera: KakeraUnit) -> None:
         await kakera.message.components[0].children[0].click()
         self.kakera_stock -= kakera.claim_cost
+        logger.info(
+            f"... Successfully claimed {kakera.color} on {self._channel.guild.name}."
+        )
 
     @tasks.loop(count=1)
     async def _check_rolls(self, bot: Any, timezone: timezone) -> None:
+        logger.info(
+            f"Waiting {self.settings.delay_rolls}s before claiming rolls on {self._channel.guild.name}..."
+        )
         await sleep(self.settings.delay_rolls)
         roll_to_claim: Roll = self.rolling.claimable_rolls.pop()
         if roll_to_claim.was_claimed:
+            logger.info(
+                f"... {roll_to_claim.name} was already claimed on {self._channel.guild.name}."
+            )
             return
 
         current_time = datetime.now(tz=timezone).timestamp()
@@ -128,6 +159,9 @@ class MudaeChannel:
             await self.claim_rt(bot, timezone)
 
         await self.claim_roll(roll_to_claim.message, timezone)
+        logger.info(
+            f"Checking if can claim more rolls on {self._channel.guild.name}..."
+        )
         if self.rolling.claimable_rolls and self.rolling.rt.is_ready(current_time):
             candidate = self.rolling.claimable_rolls.pop()
             if self.should_claim(
@@ -138,7 +172,9 @@ class MudaeChannel:
                 "rt",
             ):
                 await self.claim_roll(candidate.message, timezone)
+        logger.info(f"... Can't claim any more rolls on {self._channel.guild.name}.")
         self.rolling.claimable_rolls.clear()
+        logger.debug(f"Cleared claimable rolls on {self._channel.guild.name}")
 
     @retry(delay=0, exceptions=(NotFound, RuntimeError, InvalidData))
     async def claim_roll(self, roll: Message, timezone: timezone) -> None:
@@ -150,6 +186,9 @@ class MudaeChannel:
                 self.settings.shifthour,
             ),
             datetime.now(tz=timezone).timestamp(),
+        )
+        logger.info(
+            f"... Successfully claimed {roll.embeds[0].title} on {self._channel.guild.name}."
         )
 
     @retry(delay=0, exceptions=(TimeoutError, NotFound))
@@ -169,6 +208,7 @@ class MudaeChannel:
     @retry(delay=0, exceptions=(TimeoutError, NotFound))
     async def claim_dk(self, bot, timezone: timezone) -> None:
         await self._channel.send(f"{self.settings.prefix}dk")
+        logger.info(f"Claiming dk on {self._channel.guild.name}...")
 
         await bot.wait_for(
             "message",
@@ -184,10 +224,12 @@ class MudaeChannel:
             self.settings.dk_max_cooldown_in_seconds,
             datetime.now(tz=timezone).timestamp(),
         )
+        logger.info(f"... Successfully claimed dk on {self._channel.guild.name}.")
 
     @retry(delay=0, exceptions=(TimeoutError, NotFound))
     async def claim_rt(self, bot, timezone) -> None:
         sent_message = await self._channel.send(f"{self.settings.prefix}rt")
+        logger.info(f"Claiming rt on {self._channel.guild.name}...")
 
         await bot.wait_for(
             "reaction_add",
@@ -202,10 +244,12 @@ class MudaeChannel:
             self.settings.rt_max_cooldown_in_seconds,
             datetime.now(tz=timezone).timestamp(),
         )
+        logger.info(f"... Successfully claimed rt on {self._channel.guild.name}.")
 
     @retry(delay=0, exceptions=(TimeoutError, NotFound))
     async def claim_daily(self, bot: Any, daily: Cooldown, timezone: timezone) -> None:
         sent_message = await self._channel.send(f"{self.settings.prefix} daily")
+        logger.info(f"Claiming daily on {self._channel.guild.name}...")
 
         await bot.wait_for(
             "reaction_add",
@@ -220,3 +264,4 @@ class MudaeChannel:
             MAX_MUDAE_COOLDOWN,
             datetime.now(tz=timezone).timestamp(),
         )
+        logger.info(f"... Successfully claimed daily on {self._channel.guild.name}.")
