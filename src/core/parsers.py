@@ -79,7 +79,7 @@ _KAKERA_IN_TU_PATTERN = re_compile(r"(\d+)%")
 
 
 def get_kakera_and_kakera_default_cost(content: str) -> tuple[int, int]:
-    kakera_value, kakera_cost, _ = _KAKERA_IN_TU_PATTERN.findall(content)[0]
+    kakera_value, kakera_cost, _ = _KAKERA_IN_TU_PATTERN.findall(content)
 
     return int(kakera_value), int(kakera_cost)
 
