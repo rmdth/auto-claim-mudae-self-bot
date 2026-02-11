@@ -44,3 +44,7 @@ def test_get_daily_timedelta(tu_message_es) -> None:
 
 def test_get_rt_timedelta(tu_message_es) -> None:
     assert parsers.get_rt_timedelta(tu_message_es) == timedelta()
+
+
+def test_get_dk_timedelta(tu_message_es) -> None:
+    assert parsers.get_dk_timedelta(tu_message_es) == timedelta()
