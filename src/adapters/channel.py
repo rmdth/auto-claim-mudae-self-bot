@@ -146,7 +146,7 @@ class MudaeChannel:
         )
         await sleep(self.settings.delay_rolls)
         roll_to_claim: Roll = self.rolling.claimable_rolls.pop()
-        if roll_to_claim.was_claimed:
+        if roll_to_claim.was_claimed():
             logger.info(
                 f"... {roll_to_claim.name} was already claimed on {self._channel.guild.name}."
             )
