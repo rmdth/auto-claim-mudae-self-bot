@@ -181,7 +181,7 @@ class MudaeChannel:
         await roll.components[0].children[0].click()
         self.rolling.claim.set_cooldown(
             next_claim(
-                datetime.now(tz=self._timezone),
+                datetime.now(tz=timezone),
                 self.settings.minute_reset,
                 self.settings.shifthour,
             ),
