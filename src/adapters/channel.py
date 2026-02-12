@@ -248,7 +248,7 @@ class MudaeChannel:
 
     @retry(delay=0, exceptions=(TimeoutError, NotFound))
     async def claim_daily(self, bot: Any, daily: Cooldown, timezone: timezone) -> None:
-        sent_message = await self._channel.send(f"{self.settings.prefix} daily")
+        sent_message = await self._channel.send(f"{self.settings.prefix}daily")
         logger.info(f"Claiming daily on {self._channel.guild.name}...")
 
         await bot.wait_for(

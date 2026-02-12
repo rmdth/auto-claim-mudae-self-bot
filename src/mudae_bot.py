@@ -28,10 +28,9 @@ class MudaeBot(discord.Client):
         if not self.channels_information:
             raise ValueError("Channels dictionary is empty.")
 
-    @tasks.loop(hours=1)
-    async def _claim_daily(self) -> None:
-        await sleep(MAX_MUDAE_COOLDOWN)
-
+    @tasks.loop(seconds=MAX_MUDAE_COOLDOWN)
+    async def _claim_daily(self, current_time: float) -> None:
+        await sleep(self.daily.remaining_seconds(current_time))
         await self.channels[choice(list(self.channels.keys()))].claim_daily(
             self, self.daily, self.timezone
         )
@@ -124,7 +123,7 @@ class MudaeBot(discord.Client):
 
             self.daily = data["daily"]
             try:
-                self._claim_daily.start()
+                self._claim_daily.start(datetime.now(tz=self.timezone).timestamp())
             except RuntimeError:
                 pass
 
