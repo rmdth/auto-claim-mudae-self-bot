@@ -10,6 +10,7 @@ from src.adapters.channel import MudaeChannel
 from src.core.constants import MAX_MUDAE_COOLDOWN, MUDAE_ID
 from src.core.logic import get_roll_type
 from src.core.models import ChannelSettings, Cooldown, KakeraStock, Rolling
+from src.core.modes import decide_mode
 from src.core.parsers import parse_message
 
 logger = logging.getLogger(__name__)
@@ -106,6 +107,7 @@ class MudaeBot(discord.Client):
             mudae_channel = MudaeChannel(
                 discord_channel, ChannelSettings.from_dict(settings)
             )
+            mudae_channel.set_mode(settings.get("mode", "default"), decide_mode)
             self.channels[id] = mudae_channel
 
             data = await mudae_channel.fetch_tu_data(
