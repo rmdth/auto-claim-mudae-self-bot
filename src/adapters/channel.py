@@ -240,7 +240,7 @@ class MudaeChannel:
             ),
             timeout=1.0,
         )
-        self.rt.set_cooldown(
+        self.rolling.rt.set_cooldown(
             self.settings.rt_max_cooldown_in_seconds,
             datetime.now(tz=timezone).timestamp(),
         )
