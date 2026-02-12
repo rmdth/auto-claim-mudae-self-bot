@@ -65,8 +65,8 @@ class MudaeChannel:
             f"Rolling on {self._channel.guild.name} with {self.rolling.rolls} rolls..."
         )
         for _ in range(self.rolling.rolls):
-            await self.roll()
             await sleep(0.5)
+            await self.roll()
         logger.info(
             f"Finished rolling on {self._channel.guild.name} with {self.rolling.rolls} rolls."
         )
