@@ -72,14 +72,15 @@ class MudaeBot(discord.Client):
         ):
             return
 
+        remaining_seconds = self.channels[
+            message.channel.id
+        ].rolling.claim.remaining_seconds(datetime.now(tz=self.timezone).timestamp())
         if not self.channels[message.channel.id].should_claim(
             unit,
             self.channels[
                 message.channel.id
             ].settings.roll_preferences.min_kakera_value,
-            self.channels[message.channel.id].rolling.claim.remaining_seconds(
-                datetime.now(tz=self.timezone).timestamp()
-            )
+            remaining_seconds
             <= self.channels[
                 message.channel.id
             ].settings.last_claim_threshold_in_seconds,
