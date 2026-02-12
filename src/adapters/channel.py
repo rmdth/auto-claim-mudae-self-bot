@@ -219,7 +219,7 @@ class MudaeChannel:
             ),
             timeout=1.0,
         )
-        self.dk.set_cooldown(
+        self.kakera_stock.dk.set_cooldown(
             self.settings.dk_max_cooldown_in_seconds,
             datetime.now(tz=timezone).timestamp(),
         )
