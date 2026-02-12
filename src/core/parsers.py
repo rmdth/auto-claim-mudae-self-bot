@@ -157,7 +157,7 @@ def create_kakera_unit(
         embed,
         kakera_cost,
         color,
-        int(_ROLL_KEYS_PATTERN.findall(embed["description"])[0]),
+        int((_ROLL_KEYS_PATTERN.findall(embed["description"]) or [0])[0]),
         user_name,
     )
     return KakeraUnit(
