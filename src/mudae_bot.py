@@ -85,6 +85,9 @@ class MudaeBot(discord.Client):
             ].settings.last_claim_threshold_in_seconds,
             available_claim,
         ):
+            logger.debug(
+                f"Skipping\n{unit}\nmin_kakera_value: {self.channels[message.channel.id].settings.roll_preferences.min_kakera_value}\nlast_claim_threshold_in_seconds: {self.channels[message.channel.id].settings.last_claim_threshold_in_seconds}\nclaim_remaining_seconds: {remaining_seconds}\navailable_claim: {available_claim}\nIn {self.channels[message.channel.id]._channel.guild.name}"
+            )
             return
 
         self.channels[message.channel.id].add(unit, self, self.timezone)
