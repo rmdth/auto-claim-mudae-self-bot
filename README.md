@@ -83,7 +83,7 @@ pip install -r requirements.txt
 
 ## Configuration reference
 
-You will edit or copy `bot-settings-exmaple.toml` and rename that to `bot-settings.toml`. Most values can be grabbed with Mudae's `$settings` command.
+You will edit or copy `bot-settings-example.toml` and rename that to `bot-settings.toml`. Most values can be grabbed with Mudae's `$settings` command.
 
 - `token`: Your Discord account token.
 - `UTC_delta`: Your offset from UTC (for example VET is UTC-4 so `-4`).
