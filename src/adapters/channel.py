@@ -107,28 +107,28 @@ class MudaeChannel:
             f"Waiting {self.settings.delay_kakera}s before claiming kakera on {self._channel.guild.name}..."
         )
         await sleep(self.settings.delay_kakera)
-        kakera_to_claim: KakeraUnit = self.kakera_stock.claimable_kakera.pop()
+        while self.kakera_stock.claimable_kakera:
+            kakera_to_claim: KakeraUnit = self.kakera_stock.claimable_kakera.pop()
 
-        current_time = datetime.now(tz=timezone).timestamp()
-        if self.kakera_stock.available_claim(
-            kakera_to_claim, current_time
-        ) == "dk" and self.dk.is_ready(current_time):
-            await self.claim_dk(bot, timezone)
+            current_time: float = datetime.now(tz=timezone).timestamp()
 
-        await self.claim_kakera(kakera_to_claim)
-        logger.info(
-            f"Checking if there is more kakera to claim on {self._channel.guild.name}..."
-        )
+            if not (
+                available_claim := self.kakera_stock.available_claim(
+                    kakera_to_claim, current_time
+                )
+            ):
+                break
 
-        if self.kakera_stock.claimable_kakera and self.kakera_stock.dk.is_ready(
-            current_time
-        ):
-            candidate = self.kakera_stock.claimable_kakera.pop()
-            if self.should_claim(candidate, 0, False, "dk"):
-                await self.claim_kakera(candidate)
+            if available_claim == "dk" and self.kakera_stock.dk.is_ready(current_time):
+                await self.claim_dk(bot, timezone)
+
+            await self.claim_kakera(kakera_to_claim)
+            logger.info(
+                f"Checking if there is more kakera to claim on {self._channel.guild.name}..."
+            )
         logger.info(f"... Can't claim any more kakera on {self._channel.guild.name}.")
-
         self.kakera_stock.claimable_kakera.clear()
+        logger.debug(f"Cleared claimable kakera on {self._channel.guild.name}")
 
     @retry(delay=0, exceptions=(NotFound, InvalidData))
     async def claim_kakera(self, kakera: KakeraUnit) -> None:
