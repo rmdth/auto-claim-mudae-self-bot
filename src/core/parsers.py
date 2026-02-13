@@ -38,6 +38,9 @@ def get_claim_timedelta(content: str) -> timedelta:
     """
     Always returns the time. Only use after checking curr_claim_status
     """
+    if available_claim(content):
+        return timedelta()
+
     hours, minutes = _CURRENT_CLAIM_TIME_PATTERN.findall(content)[0]
 
     return timedelta(hours=int(hours or 0), minutes=int(minutes or 0))
@@ -95,6 +98,7 @@ def get_rolls(content: str) -> int:
 def get_tu_information(content: str, current_time: float) -> dict[str, Any]:
     kakera_value, kakera_cost = get_kakera_and_kakera_default_cost(content)
     return {
+        "claim": Cooldown(get_claim_timedelta(content).total_seconds() + current_time),
         "daily": Cooldown(get_daily_timedelta(content).total_seconds() + current_time),
         "rt": Cooldown(get_rt_timedelta(content).total_seconds() + current_time),
         "dk": Cooldown(get_dk_timedelta(content).total_seconds() + current_time),
