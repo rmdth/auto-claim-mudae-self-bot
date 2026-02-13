@@ -19,14 +19,13 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 - Claims by series.
 - Claims by desired kakera colors.
 - Kakera and Roll claim have their own delay.
-- Last "hour" auto claim based on given time (seconds).
+- last claim chance auto claim any based on given time (seconds).
 - Adjust claim kakera costs.
 - Checks if dk and rt are available to use them before claiming.
 - Only uses rt on wishes.
 - Wishes have priority over regular claims.
-- Sorts by highest kakera value.
-- If the wanted claim was claimed, it will try to claim another based on criteria.
-- Reconnects.
+- Prioritizes by highest kakera value.
+- If the wanted claim was claimed, it will try to claim another based on the same criteria.
 
 ## Cool things to add
 
