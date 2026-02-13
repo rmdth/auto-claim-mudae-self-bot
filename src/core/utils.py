@@ -1,5 +1,8 @@
 import asyncio
+import logging
 from functools import wraps
+
+logger = logging.getLogger(__name__)
 
 
 def retry(max_attempts: int = 5, delay: float = 1, exceptions=(asyncio.TimeoutError,)):
@@ -14,6 +17,7 @@ def retry(max_attempts: int = 5, delay: float = 1, exceptions=(asyncio.TimeoutEr
                     return await func(*args, **kwargs)
                 except exceptions as e:
                     last_exception = e
+                    logger.debug(f"Retry exception: {e}")
                     await asyncio.sleep(delay)
 
             raise last_exception
