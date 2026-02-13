@@ -21,7 +21,9 @@ def default(
         return False  # Is not wished and is a reset.
     elif isinstance(unit, KakeraUnit):
         return True
-    return is_roll_threshold and min_kakera <= unit.kakera_value
+    elif min_kakera <= unit.kakera_value:
+        return True
+    return is_roll_threshold
 
 
 def decide_mode(
