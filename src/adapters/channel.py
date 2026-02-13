@@ -144,33 +144,38 @@ class MudaeChannel:
             f"Waiting {self.settings.delay_rolls}s before claiming rolls on {self._channel.guild.name}..."
         )
         await sleep(self.settings.delay_rolls)
-        roll_to_claim: Roll = self.rolling.claimable_rolls.pop()
-        if roll_to_claim.was_claimed():
-            logger.info(
-                f"... {roll_to_claim.name} was already claimed on {self._channel.guild.name}."
-            )
-            return
+        while self.rolling.claimable_rolls:
+            roll_to_claim: Roll = self.rolling.claimable_rolls.pop()
+            if roll_to_claim.was_claimed():
+                logger.info(
+                    f"... {roll_to_claim.name} was already claimed on {self._channel.guild.name}."
+                )
+                continue
 
-        current_time = datetime.now(tz=timezone).timestamp()
-        if self.rolling.available_claim(
-            current_time
-        ) == "rt" and self.rolling.rt.is_ready(current_time):
-            await self.claim_rt(bot, timezone)
+            current_time: float = datetime.now(tz=timezone).timestamp()
+            if not (available_claim := self.rolling.available_claim(current_time)):
+                break
 
-        await self.claim_roll(roll_to_claim.message, timezone)
-        logger.info(
-            f"Checking if can claim more rolls on {self._channel.guild.name}..."
-        )
-        if self.rolling.claimable_rolls and self.rolling.rt.is_ready(current_time):
-            candidate = self.rolling.claimable_rolls.pop()
-            if self.should_claim(
-                candidate,
+            if not self.should_claim(
+                roll_to_claim,
                 self.settings.roll_preferences.min_kakera_value,
-                self.rolling.claim.remaining_seconds(current_time)
+                next_claim(
+                    datetime.now(tz=timezone),
+                    self.settings.minute_reset,
+                    self.settings.shifthour,
+                )
                 <= self.settings.last_claim_threshold_in_seconds,
-                "rt",
+                available_claim,
             ):
-                await self.claim_roll(candidate.message, timezone)
+                break
+
+            if available_claim == "rt" and self.rolling.rt.is_ready(current_time):
+                await self.claim_rt(bot, timezone)
+
+            await self.claim_roll(roll_to_claim, timezone)
+            logger.info(
+                f"Checking if can claim more rolls on {self._channel.guild.name}..."
+            )
         self.rolling.claimable_rolls.clear()
         logger.debug(f"Cleared claimable rolls on {self._channel.guild.name}")
 
