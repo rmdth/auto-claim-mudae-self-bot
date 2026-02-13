@@ -33,7 +33,8 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 
 ## Known Issues
 
-- Sometimes doesn't claim rt and dk properly.
+- Sometimes doesn't claim rt, dk properly sometimes just restart since it will have fake information.
+- kakera_power_total the same as above with daily but it gets stuck trying to claim.
 
 ## Notes
 
@@ -87,17 +88,17 @@ You will edit or copy `bot-settings-example.toml` and rename that to `bot-settin
 Each `[[channels_information]]` block is one channel (copy it to add more):
 
 - `id`: Channel id where rolls happen.
-- `[channels_information.settings]`: Everything inside is per channel.
-  - `max_rolls`: Max rolls you can do in that channel.
-  - `prefix`: Server prefix for mudae.
-  - `command`: Command you want to roll.
-  - `shifthour`: Server `$shifthour` value.
-  - `restart_time_minute`: Minute where rolls restart.
-  - `delay_rolls`: Delay you want for roll claims.
-  - `delay_kakera`: Delay you want for kakera claims.
-  - `max_rt_cooldown_in_seconds`: Cooldown threshold before trying `$rt` again. Make sure to adjust it based on your own cooldown
-  - `kakera_power_total`: Your total kakera power.
-  - `wish_list`: Characters to always claim. _Case sensitive_.
-  - `wish_series`: Series to always claim. _Case sensitive_.
-  - `wish_kakera`: Kakera colors to click (`"kakera"` means any color leave it as it is if you want that ELSE add the color initial in uppercase. Example: `kakeraO` for orange). [reference](https://mudae.fandom.com/wiki/Kakera) _Case sensitive_.
-  - `min_kakera_value`: Minimum kakera value required to auto claim.
+- `max_rolls`: Max rolls you can do in that channel.
+- `prefix`: Server prefix for mudae.
+- `command`: Command you want to roll.
+- `shifthour`: Server `$shifthour` value.
+- `minute_reset`: Minute where rolls restart.
+- `delay_rolls`: Delay you want for roll claims.
+- `delay_kakera`: Delay you want for kakera claims.
+- `rt_max_cooldown_in_seconds`: Cooldown threshold before trying `$rt` again. Make sure to adjust it based on your own cooldown
+- `dk_max_cooldown_in_seconds`: Cooldown threshold before trying `$dk` again. Make sure to adjust it based on your own cooldown
+- `kakera_max`: Your maximum kakera power.
+- `wish_list`: Characters to always claim. _Case sensitive_.
+- `wish_series`: Series to always claim. _Case sensitive_.
+- `wish_kakera`: Kakera colors to click [Might not work since it's not tested] (`"kakera"` means any color leave it as it is if you want that ELSE add the color initial in uppercase. Example: `kakeraO` for orange). [reference](https://mudae.fandom.com/wiki/Kakera) _Case sensitive_.
+- `min_kakera_value`: Minimum kakera value required to auto claim.
