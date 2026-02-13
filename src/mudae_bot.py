@@ -8,7 +8,7 @@ from discord.ext import tasks
 
 from src.adapters.channel import MudaeChannel
 from src.core.constants import MAX_MUDAE_COOLDOWN, MUDAE_ID
-from src.core.logic import get_roll_type
+from src.core.logic import get_roll_type, next_claim
 from src.core.models import ChannelSettings, Cooldown, KakeraStock, Rolling
 from src.core.modes import decide_mode
 from src.core.parsers import parse_message
@@ -72,9 +72,11 @@ class MudaeBot(discord.Client):
         ):
             return
 
-        remaining_seconds = self.channels[
-            message.channel.id
-        ].rolling.claim.remaining_seconds(datetime.now(tz=self.timezone).timestamp())
+        remaining_seconds = next_claim(
+            datetime.now(tz=self.timezone),
+            self.channels[message.channel.id].settings.minute_reset,
+            self.channels[message.channel.id].settings.shifthour,
+        )
         if not self.channels[message.channel.id].should_claim(
             unit,
             self.channels[
