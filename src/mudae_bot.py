@@ -52,7 +52,7 @@ class MudaeBot(discord.Client):
             return
 
         embed = message.embeds[0].to_dict()
-        roll_type = get_roll_type(embed, message.components[0].children[0].emoji.name)
+        roll_type = get_roll_type(message, embed)
 
         if not (
             unit := parse_message(

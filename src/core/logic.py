@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from discord.message import Message
+
 
 def next_claim(now: datetime, minute_reset: int = 0, shifthour: int = 0) -> float:
     """
@@ -30,14 +32,17 @@ def next_claim(now: datetime, minute_reset: int = 0, shifthour: int = 0) -> floa
     return (actual_time - now).total_seconds()
 
 
-def get_roll_type(embed: dict, emoji_name: str) -> str:
+def get_roll_type(message: Message, embed: dict) -> str:
     if "image" not in embed or "author" not in embed:
         return ""
 
     if "footer" in embed and "text" in embed["footer"]:
         if "/" in embed["footer"]["text"]:
             return ""
-        elif "kakera" in emoji_name:
+        elif (
+            message.components != []
+            and "kakera" in message.components[0].children[0].emoji.name
+        ):
             return "kakera"
 
     return "roll"
