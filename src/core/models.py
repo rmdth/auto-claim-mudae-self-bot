@@ -41,6 +41,9 @@ class KakeraUnit:
     def priority(self) -> int:
         return self.KAKERA_PRIORITY.get(self.color, self.KAKERA_PRIORITY["kakera"] - 1)
 
+    def __str__(self) -> str:
+        return f"{self.color}"
+
     def is_wished(self, roll_preferences: "RollPreferences") -> bool:
         return self.color in roll_preferences.wish_kakera
 
