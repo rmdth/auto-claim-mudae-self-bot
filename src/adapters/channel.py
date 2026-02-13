@@ -5,7 +5,6 @@ from typing import Any, Callable
 
 from discord.errors import InvalidData, NotFound
 from discord.ext import tasks
-from discord.message import Message
 
 from src.core.constants import MAX_MUDAE_COOLDOWN, MUDAE_ID
 from src.core.logic import next_claim
@@ -176,9 +175,9 @@ class MudaeChannel:
         self.rolling.claimable_rolls.clear()
         logger.debug(f"Cleared claimable rolls on {self._channel.guild.name}")
 
-    @retry(delay=0, exceptions=(NotFound, RuntimeError, InvalidData))
-    async def claim_roll(self, roll: Message, timezone: timezone) -> None:
-        await roll.components[0].children[0].click()
+    @retry(delay=0, exceptions=(NotFound, InvalidData))
+    async def claim_roll(self, roll: Roll, timezone: timezone) -> None:
+        await roll.message.components[0].children[0].click()
         self.rolling.claim.set_cooldown(
             next_claim(
                 datetime.now(tz=timezone),
@@ -187,9 +186,7 @@ class MudaeChannel:
             ),
             datetime.now(tz=timezone).timestamp(),
         )
-        logger.info(
-            f"... Successfully claimed {roll.embeds[0].title} on {self._channel.guild.name}."
-        )
+        logger.info(f"... Successfully claimed {roll} on {self._channel.guild.name}.")
 
     @retry(delay=0, exceptions=(TimeoutError, NotFound))
     async def fetch_tu_data(self, bot: Any, current_time: float) -> dict[str, Any]:
