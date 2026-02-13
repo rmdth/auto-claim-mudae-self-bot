@@ -93,7 +93,11 @@ class Roll:
     wished: bool = False
 
     def __str__(self) -> str:
-        return f"{self.name}\n{self.series}\nKeys: {self.key_amount}\nValue: {self.kakera_value}"
+        return (
+            f"*{self.kakera_value} k{self.key_amount} - {self.name}[{self.series}]"
+            if self.key_amount
+            else f"*{self.kakera_value} - {self.name}[{self.series}]"
+        )
 
     def is_wished(self, roll_preferences: "RollPreferences") -> bool:
         return (
