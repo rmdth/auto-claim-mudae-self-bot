@@ -102,12 +102,6 @@ class Roll:
             else f"*{self.kakera_value} - {self.name}[{self.series}]"
         )
 
-    def is_wished(self, roll_preferences: "RollPreferences") -> bool:
-        return (
-            self.name in roll_preferences.wish_list
-            or self.series in roll_preferences.wish_series
-        )
-
     def was_claimed(self) -> bool:
         return self.message.embeds[0].to_dict()["color"] == 6753288
 

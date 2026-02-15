@@ -6,7 +6,8 @@ from typing import Any
 
 from discord import Message
 
-from src.core.models import Cooldown, KakeraUnit, Roll
+from src.core.logic import wished_roll
+from src.core.models import Cooldown, KakeraUnit, Roll, RollPreferences
 
 logger = logging.getLogger(__name__)
 
@@ -123,10 +124,11 @@ def parse_message(
     roll_type: str,
     kakera_cost: int,
     user_name: str,
+    roll_preferences: RollPreferences,
     message: Any,
 ) -> Roll | KakeraUnit | None:
     if roll_type == "roll":
-        return create_roll(embed, message)
+        return create_roll(embed, message, roll_preferences)
     elif roll_type == "kakera":
         return create_kakera_unit(embed, kakera_cost, user_name, message)
     return None
@@ -137,15 +139,22 @@ _ROLL_SERIES_PATTERN = re_compile(r"(.+)\s")
 _ROLL_KEYS_PATTERN = re_compile(r"\(.+(\d).+\)")
 
 
-def create_roll(embed: dict, message: Any) -> Roll:
+def create_roll(embed: dict, message: Any, roll_preferences: RollPreferences) -> Roll:
+    name = embed["author"]["name"]
+    series = _ROLL_SERIES_PATTERN.findall(embed["description"])[0]
     return Roll(
-        name=embed["author"]["name"],
-        series=_ROLL_SERIES_PATTERN.findall(embed["description"])[0],
+        name=name,
+        series=series,
         kakera_value=int(
             _ROLL_KAKERA_PATTERN.findall(embed["description"])[0].replace(".", "")
         ),
         key_amount=int((_ROLL_KEYS_PATTERN.findall(embed["description"]) or [0])[0]),
         message=message,
+        wished=wished_roll(
+            name,
+            series,
+            roll_preferences,
+        ),
     )
 
 

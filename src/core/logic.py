@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 
 from discord.message import Message
 
+from src.core.models import RollPreferences
+
 
 def next_claim(now: datetime, minute_reset: int = 0, shifthour: int = 0) -> float:
     """
@@ -46,3 +48,7 @@ def get_roll_type(message: Message, embed: dict) -> str:
             return "kakera"
 
     return "roll"
+
+
+def wished_roll(name: str, series: str, roll_preferences: "RollPreferences") -> bool:
+    return name in roll_preferences.wish_list or series in roll_preferences.wish_series

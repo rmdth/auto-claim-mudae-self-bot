@@ -60,6 +60,7 @@ class MudaeBot(discord.Client):
                 roll_type,
                 self.channels[message.channel.id].kakera_stock.kakera_cost,
                 self.user.name,
+                self.channels[message.channel.id].settings.roll_preferences,
                 message,
             )
         ):
