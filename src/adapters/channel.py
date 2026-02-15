@@ -176,6 +176,7 @@ class MudaeChannel:
             logger.info(
                 f"Checking if can claim more rolls on {self._channel.guild.name}..."
             )
+        logger.info(f"... Can't claim any more rolls on {self._channel.guild.name}.")
         self.rolling.claimable_rolls.clear()
         logger.debug(f"Cleared claimable rolls on {self._channel.guild.name}")
 
