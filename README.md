@@ -41,6 +41,7 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 - I don't really use github. I'm a new programmer who wants to be a great one so any criticism is welcome.
 - This project was heavily inspired by this deprecated [one](https://github.com/vivinano/MudaeAutoBot).
 - Tested in private servers with a few players.
+- You need to have rt unlocked.
 
 ## Contributions
 
