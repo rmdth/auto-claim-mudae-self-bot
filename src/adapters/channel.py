@@ -217,7 +217,7 @@ class MudaeChannel:
             check=lambda message: message.channel.id == self._channel.id
             and message.author.id == MUDAE_ID
             and (
-                _KAKERA_DK_CONFIRMATION_PATTERN.match(message.content)
+                _KAKERA_DK_CONFIRMATION_PATTERN.findall(message.content)
                 or "dk" in message.content
             ),
             timeout=1.0,
