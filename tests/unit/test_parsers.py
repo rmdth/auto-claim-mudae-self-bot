@@ -74,6 +74,7 @@ def test_get_tu_information(tu_message_es) -> None:
     assert result["kakera_cost"] == 36
     assert result["rolls"] == 10
 
+
 def test_dk_confirmation_pattern() -> None:
     message_1 = "Excelente, **+320**<:kakera:469835869059153940>kakera añadidos a tu colección. (**48.626** total)."
     message_2 = "**+261**<:kakera:469835869059153940>kakera añadidos a tu colección. (**37.837** total)."
@@ -81,4 +82,22 @@ def test_dk_confirmation_pattern() -> None:
     assert parsers._KAKERA_DK_CONFIRMATION_PATTERN.findall(message_1)
     assert parsers._KAKERA_DK_CONFIRMATION_PATTERN.findall(message_2)
     assert not parsers._KAKERA_DK_CONFIRMATION_PATTERN.findall(message_3)
-    
+
+
+def test_series_pattern() -> None:
+    message = (
+        "The Legend of Zelda: Ocarina of\nTime\n**47**<:kakera:469835869059153940>"
+    )
+    message_2 = "Life is Strange\n**103**<:kakera:469835869059153940>"
+    message_3 = (
+        "The Legend of Zelda: Breath of\nthe\nWild\n**50**<:kakera:469835869059153940>"
+    )
+    assert (
+        parsers.get_series({"description": message})
+        == "The Legend of Zelda: Ocarina of Time"
+    )
+    assert parsers.get_series({"description": message_2}) == "Life is Strange"
+    assert (
+        parsers.get_series({"description": message_3})
+        == "The Legend of Zelda: Breath of the Wild"
+    )
