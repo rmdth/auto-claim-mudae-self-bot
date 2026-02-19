@@ -73,3 +73,12 @@ def test_get_tu_information(tu_message_es) -> None:
     assert result["kakera_value"] == 110
     assert result["kakera_cost"] == 36
     assert result["rolls"] == 10
+
+def test_dk_confirmation_pattern() -> None:
+    message_1 = "Excelente, **+320**<:kakera:469835869059153940>kakera añadidos a tu colección. (**48.626** total)."
+    message_2 = "**+261**<:kakera:469835869059153940>kakera añadidos a tu colección. (**37.837** total)."
+    message_3 = "lol"
+    assert parsers._KAKERA_DK_CONFIRMATION_PATTERN.findall(message_1)
+    assert parsers._KAKERA_DK_CONFIRMATION_PATTERN.findall(message_2)
+    assert not parsers._KAKERA_DK_CONFIRMATION_PATTERN.findall(message_3)
+    
