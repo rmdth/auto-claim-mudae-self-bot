@@ -139,6 +139,10 @@ _ROLL_SERIES_PATTERN = re_compile(r"(.+)\s")
 _ROLL_KEYS_PATTERN = re_compile(r"\(.+(\d).+\)")
 
 
+def get_series(embed: dict) -> str:
+    return " ".join(_ROLL_SERIES_PATTERN.findall(embed["description"]))
+
+
 def create_roll(embed: dict, message: Any, roll_preferences: RollPreferences) -> Roll:
     name = embed["author"]["name"]
     series = _ROLL_SERIES_PATTERN.findall(embed["description"])[0]
