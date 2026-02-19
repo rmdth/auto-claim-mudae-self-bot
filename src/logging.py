@@ -7,7 +7,7 @@ LOGS_DIR = Path(__file__).parent.parent / "logs"
 
 
 def setup_logging() -> None:
-    LOGS_DIR.mkdir(exist_ok=True)
+    LOGS_DIR.mkdir(exist_ok=True, parents=True)
 
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
