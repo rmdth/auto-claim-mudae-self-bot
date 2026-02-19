@@ -145,7 +145,7 @@ def get_series(embed: dict) -> str:
 
 def create_roll(embed: dict, message: Any, roll_preferences: RollPreferences) -> Roll:
     name = embed["author"]["name"]
-    series = _ROLL_SERIES_PATTERN.findall(embed["description"])[0]
+    series = get_series(embed)
     return Roll(
         name=name,
         series=series,
