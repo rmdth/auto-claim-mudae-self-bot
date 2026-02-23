@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from re import MULTILINE
+from re import MULTILINE, Pattern
 from re import compile as re_compile
 from typing import Any
 
@@ -34,6 +34,12 @@ def available_claim(content: str) -> bool:
 _CURRENT_CLAIM_TIME_PATTERN = re_compile(r",\D+(\d+)?\D+(\d+).+min")
 
 
+def get_timedelta(pattern: Pattern, content: str) -> timedelta:
+    hours, minutes = pattern.findall(content)[0]
+
+    return timedelta(hours=int(hours or 0), minutes=int(minutes or 0))
+
+
 def get_claim_timedelta(content: str) -> timedelta:
     """
     Always returns the time. Only use after checking curr_claim_status
@@ -41,9 +47,7 @@ def get_claim_timedelta(content: str) -> timedelta:
     if available_claim(content):
         return timedelta()
 
-    hours, minutes = _CURRENT_CLAIM_TIME_PATTERN.findall(content)[0]
-
-    return timedelta(hours=int(hours or 0), minutes=int(minutes or 0))
+    return get_timedelta(_CURRENT_CLAIM_TIME_PATTERN, content)
 
 
 _DAILY_IN_TU_PATTERN = re_compile(r"\$daily\D+?(\d+)?\D+?(\d+)?\D+?$", flags=MULTILINE)
@@ -53,9 +57,7 @@ def get_daily_timedelta(content: str) -> timedelta:
     """
     [] means available IF len 2 (hours and minutes), len 1 (minutes)
     """
-    hours, minutes = _DAILY_IN_TU_PATTERN.findall(content)[0]
-
-    return timedelta(hours=int(hours or 0), minutes=int(minutes or 0))
+    return get_timedelta(_DAILY_IN_TU_PATTERN, content)
 
 
 _RT_IN_TU_PATTERN = re_compile(r"\$rt[ (:.a-zA-Z*]+(\d+)?[ (:.a-zA-Z*]+(\d+)?")
@@ -65,18 +67,14 @@ def get_rt_timedelta(content: str) -> timedelta:
     """
     [] means available IF len 2 (hours and minutes), len 1 (minutes)
     """
-    hours, minutes = _RT_IN_TU_PATTERN.findall(content)[0]
-
-    return timedelta(hours=int(hours or 0), minutes=int(minutes or 0))
+    return get_timedelta(_RT_IN_TU_PATTERN, content)
 
 
 _DK_IN_TU_PATTERN = re_compile(r"\$dk[ (:.a-zA-Z*]+(\d+)?[ (:.a-zA-Z*]+(\d+)?")
 
 
 def get_dk_timedelta(content: str) -> timedelta:
-    hours, minutes = _DK_IN_TU_PATTERN.findall(content)[0]
-
-    return timedelta(hours=int(hours or 0), minutes=int(minutes or 0))
+    return get_timedelta(_DK_IN_TU_PATTERN, content)
 
 
 _KAKERA_IN_TU_PATTERN = re_compile(r"(\d+)%")
