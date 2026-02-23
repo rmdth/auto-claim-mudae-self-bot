@@ -52,7 +52,9 @@ class MudaeBot(discord.Client):
             return
 
         embed = message.embeds[0].to_dict()
+        logger.debug(f"Embed: {embed}")
         roll_type = get_roll_type(message, embed)
+        logger.debug(f"Roll type: {roll_type}")
 
         if not (
             unit := parse_message(
@@ -65,13 +67,16 @@ class MudaeBot(discord.Client):
             )
         ):
             return
+        logger.debug(f"Parsed unit: {unit}")
 
         if not (
             available_claim := self.channels[message.channel.id].available_claim(
                 unit, self.timezone
             )
         ):
+            logger.debug("No available claim")
             return
+        logger.debug(f"Available claim: {available_claim}")
 
         remaining_seconds = next_claim(
             datetime.now(tz=self.timezone),
