@@ -1,4 +1,4 @@
-[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/Python-3.14-blue.svg)](https://www.python.org/downloads/)
 
 # Auto-Claim-Mudae-Self-Bot
 
@@ -14,27 +14,25 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 
 - Gets $tu information on setup
 - Auto rolling on given channels.
-- Auto claims daily when rolling
-- Claims wishlist characters and more given ones.
-- Claims by series.
-- Claims by desired kakera colors.
-- Kakera and Roll claim have their own delay.
-- last claim chance auto claim any based on given time (seconds).
-- Adjust claim kakera costs.
-- Checks if dk and rt are available to use them before claiming.
-- Only uses rt on wishes.
-- Wishes have priority over regular claims.
-- Prioritizes by highest kakera value.
-- If the wanted claim was claimed, it will try to claim another based on the same criteria.
+
+## Available tasks:
+
+- `claim_daily`: Auto claims daily
+- `claim_roll`: Can claim by: characters, series, last_claim, can use dk. If the wanted claim was claimed, it will try to claim another based on the same criteria.
+- `claim_kakera`: Can claim by: color, Any, can use rt.
+- `claim_roll` and `claim_kakera` have their own delay.
+- `claim_roll` and `claim_kakera` have priority with wishes and color/cost/kakera value.
 
 ## Cool things to add
 
 - Adjust to different restart claims. Currently I dont know how does the 120 minute claim works to make it.
+- Automate the sphere stuff
 
 ## Known Issues
 
-- Sometimes doesn't claim rt, dk properly sometimes just restart since it will have fake information.
-- kakera_power_total the same as above with daily but it gets stuck trying to claim.
+- I don't participate in big servers, so:
+  - You can't really be sure if you claimed kakera.
+  - When claiming $dk it may think it claimed it since the verification looks if the content contains "$dk" and doesn't have (not) "!"
 
 ## Notes
 
@@ -44,48 +42,39 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 - You need to have rt unlocked.
 - $togglerolls must be disabled and $togglebutton enabled
 
-## Contributions
-
-As I mentioned I don't really use Github so I don't know how would you do it. But you are welcome to contribute to the project!
-
 ## Installation
 
 1. **Clone the repo**:
 
 ```
-git clone https://github.com/goatedguy67/auto-claim-mudae-self-bot.git
+git clone https://github.com/rmdth/auto-claim-mudae-self-bot.git
 cd auto-claim-mudae-self-bot
 ```
 
-2. **Create a virtual enviroment** (Optional but recommended):
+2. **Setup enviroment**:
+   This project uses [uv](https://docs.astral.sh/uv/) be sure to install it.
+
+After doing so, you can do:
 
 ```
-# On Windows
-python -m venv .venv
-venv\Scripts\activate
-
-# On macOS/Linux
-python3 -m venv .venv
-source venv/bin/activate
+uv sync
 ```
 
-3. **Install dependencies**:
-
-```
-pip install -r requirements.txt
-```
+That's it
 
 4. **Make sure to read and Change bot-settings-example.toml**.
 
 5. **Run**:
-   `python main.py`
+   `uv run main.py`
 
 ## Configuration reference
 
 You will edit or copy `bot-settings-example.toml` and rename that to `bot-settings.toml`. Most values can be grabbed with Mudae's `$settings` command.
 
-- `token`: Your Discord account token.
-- `UTC_delta`: Your offset from UTC (for example VET is UTC-4 so `-4`).
+- `user_token`: Your Discord account token.
+- `debug`: bool, to see it in the UI.
+
+- `tasks`: List of tasks to run, more info in the `.toml`. It can be complicated to config/understand but by default i would say it has a great config.
 
 Each `[[channels_information]]` block is one channel (copy it to add more):
 
@@ -95,12 +84,17 @@ Each `[[channels_information]]` block is one channel (copy it to add more):
 - `command`: Command you want to roll.
 - `shifthour`: Server `$shifthour` value.
 - `minute_reset`: Minute where rolls restart.
-- `delay_rolls`: Delay you want for roll claims.
-- `delay_kakera`: Delay you want for kakera claims.
-- `rt_max_cooldown_in_seconds`: Cooldown threshold before trying `$rt` again. Make sure to adjust it based on your own cooldown
-- `dk_max_cooldown_in_seconds`: Cooldown threshold before trying `$dk` again. Make sure to adjust it based on your own cooldown
-- `kakera_max`: Your maximum kakera power.
-- `wish_list`: Characters to always claim. _Case sensitive_.
-- `wish_series`: Series to always claim. _Case sensitive_.
-- `wish_kakera`: Kakera colors to click [Might not work since it's not tested] (`"kakera"` means any color leave it as it is if you want that ELSE add the color initial in uppercase. Example: `kakeraO` for orange). [reference](https://mudae.fandom.com/wiki/Kakera) _Case sensitive_.
-- `min_kakera_value`: Minimum kakera value required to auto claim.
+- `delay_claim_roll`: Delay you want for roll claims.
+- `delay_claim_kakera`: Delay you want for kakera claims.
+- `rt_max_cd`: Cooldown threshold before trying `$rt` again. Make sure to adjust it based on your own cooldown
+- `dk_max_cd`: Cooldown threshold before trying `$dk` again. Make sure to adjust it based on your own cooldown
+- `max_kakera_power`: Your maximum kakera power.
+- `wished_rolls`: Characters to always claim. _Case sensitive_.
+- `wished_series`: Series to always claim. _Case sensitive_.
+- `wished_kakera`: Kakera colors to click [Might not work since it's not tested] (`"kakera"` means any color leave it as it is if you want that ELSE add the color initial in uppercase. Example: `kakeraO` for orange). [reference](https://mudae.fandom.com/wiki/Kakera) _Case sensitive_.
+
+## Contributions
+
+As I mentioned I don't really use Github so I don't know how would you do it. But you are welcome to contribute to the project!
+
+If you need to install dependencies use [uv](https://docs.astral.sh/uv/ accordingly.

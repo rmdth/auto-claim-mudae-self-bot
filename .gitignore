@@ -1,5 +1,8 @@
-.pytest_cache/
 .venv/
 logs/
-__pycache__/
 bot-settings.toml
+
+# Generated files
+.pytest_cache/
+.ruff_cache/
+__pycache__/
