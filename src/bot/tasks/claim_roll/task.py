@@ -4,6 +4,7 @@ from time import time as time_time
 from typing import Any
 
 from discord.client import Client
+from discord.user import ClientUser
 
 from src.bot.shared.domain import MUDAE_ID, ClaimMethod, RollMessage
 from src.bot.shared.logic import determine_claim_method
@@ -33,9 +34,11 @@ def claim_roll_context_generator(
     preferences: tuple[Preference, ...],
 ) -> ClaimRollContext:
     assert isinstance(ctx.message, RollMessage)
+    assert isinstance(ctx.bot.user, ClientUser)
 
     return ClaimRollContext(
         bot=ctx.bot,
+        user_name=str(ctx.bot.user.id),
         discord_channel=ctx.channel.discord_channel,
         prefix=ctx.channel.mudae_settings.prefix,
         roll_message=ctx.message,
@@ -50,6 +53,7 @@ async def claim_roll(ctx: ClaimRollContext) -> None:
     _is_wished = (
         ctx.roll_message.character in ctx.roll_state.wished_rolls
         or ctx.roll_message.series in ctx.roll_state.wished_series
+        or ctx.user_name in ctx.roll_message.message.content
     )
     if (
         claim_method := determine_claim_method(

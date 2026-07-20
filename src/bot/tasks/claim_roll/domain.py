@@ -16,6 +16,7 @@ class PrefContext(NamedTuple):
 
 class ClaimRollContext(NamedTuple):
     bot: Client
+    user_name: str
     discord_channel: Any
     prefix: str
     roll_state: RollState
