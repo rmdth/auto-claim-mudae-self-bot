@@ -1,4 +1,4 @@
-# Make sure to change this file name to bot-settings.toml
+# Make sure to create a copy of this file and name it bot-settings.toml
 
 debug = false
 user_token = "YOUR_DISCORD_ACCOUNT_TOKEN"
@@ -46,8 +46,8 @@ wished_series = [
 # visit https://mudae.fandom.com/wiki/Kakera to see the colors.
 # Just add the color initial in uppercase.
 # Example:
-# wish_kakera = ["kakeraT", "kakeraO"]
-wish_kakera = [
+# wished_kakera = ["kakeraT", "kakeraO"]
+wished_kakera = [
     "kakera",
     ]
 
