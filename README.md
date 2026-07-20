@@ -28,20 +28,6 @@ Python script that requires settings to mimic your rolling behavior of claiming 
 - Adjust to different restart claims. Currently I dont know how does the 120 minute claim works to make it.
 - Automate the sphere stuff
 
-## Known Issues
-
-- I don't participate in big servers, so:
-  - You can't really be sure if you claimed kakera.
-  - When claiming $dk it may think it claimed it since the verification looks if the content contains "$dk" and doesn't have (not) "!"
-
-## Notes
-
-- I don't really use github. I'm a new programmer who wants to be a great one so any criticism is welcome.
-- This project was heavily inspired by this deprecated [one](https://github.com/vivinano/MudaeAutoBot).
-- Tested in private servers with a few players.
-- You need to have rt unlocked.
-- $togglerolls must be disabled and $togglebutton enabled
-
 ## Installation
 
 1. **Clone the repo**:
@@ -92,6 +78,21 @@ Each `[[channels_information]]` block is one channel (copy it to add more):
 - `wished_rolls`: Characters to always claim. _Case sensitive_.
 - `wished_series`: Series to always claim. _Case sensitive_.
 - `wished_kakera`: Kakera colors to click [Might not work since it's not tested] (`"kakera"` means any color leave it as it is if you want that ELSE add the color initial in uppercase. Example: `kakeraO` for orange). [reference](https://mudae.fandom.com/wiki/Kakera) _Case sensitive_.
+
+## Known Issues
+
+- I don't participate in big servers, so:
+  - You can't really be sure if you claimed kakera.
+  - When claiming $dk it may think it claimed it since the verification looks if the content contains "$dk" and doesn't have (not) "!"
+
+## Notes
+
+- I don't really use github. I'm a new programmer who wants to be a great one so any criticism is welcome.
+- tested using python 3.14, it may not work for older versions
+- This project was heavily inspired by this deprecated [one](https://github.com/vivinano/MudaeAutoBot).
+- Tested in private servers with a few players.
+- You need to have rt unlocked.
+- $togglerolls must be disabled and $togglebutton enabled
 
 ## Contributions
 
