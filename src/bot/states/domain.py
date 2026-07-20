@@ -55,7 +55,7 @@ class KakeraState:
     reset_max_cd: float
     wished_kakera: frozenset[str]
     watched_kakera: list = field(default_factory=list)
-    lock: Lock = Lock()
+    lock: Lock = field(default_factory=Lock)
 
     # @property
     # def claim_in(self) -> float:
