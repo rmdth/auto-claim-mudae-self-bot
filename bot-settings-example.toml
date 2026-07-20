@@ -1,6 +1,7 @@
 # Make sure to create a copy of this file and name it bot-settings.toml
 
 debug = false
+mudae_log_length = 30
 user_token = "YOUR_DISCORD_ACCOUNT_TOKEN"
 
 # You can see *\src\bot\tasks\__init__.py to know the task_name: str, their preferences {str, {}}, input_data for preference {}
