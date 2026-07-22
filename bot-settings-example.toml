@@ -9,7 +9,7 @@ tasks = [
     ["auto_roll", {}],
     ["claim_daily", {}],
     ["claim_kakera", {"always_claim" = {}}],
-    ["claim_roll", {"claim_threshold" = {"claim_threshold" = 200}, "use_resets_on_wish_only"= {}, "auto_last_claim"= {}}]
+    ["claim_roll", {"claim_threshold" = {"claim_threshold" = 200}, "claim_wished" = {}, "use_resets_on_wish"= {}, "auto_last_claim"= {}}]
 ]
 
 

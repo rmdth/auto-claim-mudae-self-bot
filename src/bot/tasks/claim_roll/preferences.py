@@ -10,8 +10,10 @@ from src.ui import update_log_debug
 
 class ClaimRollsPreferences(StrEnum):
     ONLY_WISHED_ROLL = "only_wished_roll"  # This one should be priotized and exclude the other ones, since the should claim functions and the other prefences work as Any. Since its supossed to be TUI maybe a map that relates between certain preferences to exclude them
+    # At this point this whole thing isn't a preference, idk what they are simple conditionals? but preferences should change behaviour i think
+    CLAIM_WISHED = "claim_wished"
     CLAIM_THRESHOLD = "claim_threshold"
-    USE_RESETS_ON_WISH_ONLY = "use_resets_on_wish_only"
+    USE_RESETS_ON_WISH = "use_resets_on_wish"
     AUTO_LAST_CLAIM = "auto_last_claim"
 
 
@@ -39,12 +41,16 @@ def is_last_claim(ctx: PrefContext, input_data: dict[str, Any]) -> bool:
 
 claim_roll_preferences = (
     Preference(
-        ClaimRollsPreferences.USE_RESETS_ON_WISH_ONLY,
+        ClaimRollsPreferences.CLAIM_WISHED,
         is_wished,
         input_data={},
-        preference_data={
-            "claim_method": frozenset({ClaimMethod.CLAIM, ClaimMethod.RESET})
-        },
+        preference_data={"claim_method": frozenset({ClaimMethod.CLAIM})},
+    ),
+    Preference(
+        ClaimRollsPreferences.USE_RESETS_ON_WISH,
+        is_wished,
+        input_data={},
+        preference_data={"claim_method": frozenset({ClaimMethod.RESET})},
     ),
     Preference(
         ClaimRollsPreferences.CLAIM_THRESHOLD,
