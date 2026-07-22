@@ -11,6 +11,8 @@ from src.bot.tasks.claim_kakera.domain import ClaimKakeraContext, Kakera
 from src.bot.tasks.claim_kakera.logic import (
     _KAKERA_PRIORITY,
     get_kakera_claim_cost,
+    get_ku_power,
+    is_ku_message,
     should_claim,
 )
 from src.bot.tasks.shared.domain import OnMessageContext, Preference
@@ -87,6 +89,9 @@ async def claim_kakeras(ctx: ClaimKakeraContext) -> None:
     async with ctx.kakera_state.lock:
         update_log_info(
             f"Waiting {ctx.kakera_state.delay_claim_kakera} before claiming watched kakera"
+        )
+        ctx.kakera_state.power = await fetch_ku_power(
+            ctx.bot, ctx.discord_channel, ctx.prefix
         )
         await asyncio_sleep(ctx.kakera_state.delay_claim_kakera)
         ctx.kakera_state.watched_kakera.sort(
@@ -214,3 +219,25 @@ async def claim_dk(
     update_channel_state(
         discord_channel.id, ChannelState.KAKERA.value, kakera_state.print()
     )
+
+
+@retry()
+async def fetch_ku_power(
+    bot: Client,
+    discord_channel: Any,
+    prefix: str,
+) -> int:
+    def check(message):
+        return (
+            message.channel.id == discord_channel.id
+            and message.author.id == MUDAE_ID
+            and is_ku_message(message.content)
+        )
+
+    await discord_channel.send(f"{prefix}ku")
+    ku_message = await bot.wait_for(
+        "message",
+        check=check,
+        timeout=1.5,
+    )
+    return get_ku_power(ku_message)

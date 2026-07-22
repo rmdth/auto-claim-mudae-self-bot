@@ -3,6 +3,7 @@ from re import compile as re_compile
 from src.bot.shared.domain import ClaimMethod, KakeraMessage
 from src.bot.tasks.claim_kakera.domain import PrefContext
 from src.bot.tasks.shared.domain import Preference
+from src.ui import update_log_debug
 
 _KAKERA_PRIORITY: dict[str, int] = {
     "kakera": 1,
@@ -22,9 +23,24 @@ _KAKERA_DK_CONFIRMATION_PATTERN = re_compile(
     r"\*\*\+\d+\*\*<:kakera:469835869059153940>kakera"
 )
 
+_KAKERA_KU_PATTERN = re_compile(r"\*\*(\d+)%\*\*")
+
 
 def is_dk_confirmation(content: str) -> bool:
     return bool(_KAKERA_DK_CONFIRMATION_PATTERN.findall(content))
+
+
+def is_ku_message(content: str) -> bool:
+    s = content.split("\n")
+    return len(s) == 5 and "%" in s[1] and "%" in s[2] and "%" in s[3]
+
+
+def get_ku_power(content: str) -> int:
+    try:
+        return int(_KAKERA_KU_PATTERN.search(content)[0])
+    except Exception as e:
+        update_log_debug(f"Failed to parse ku power: {e}, {e.__class__}...")
+        return 100  # Is better to think it has than use dk
 
 
 def get_kakera_claim_cost(
