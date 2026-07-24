@@ -123,16 +123,11 @@ async def claim_roll(ctx: ClaimRollContext) -> None:
                 )
                 break
 
-            _is_wished = (
-                ctx.roll_message.character in ctx.roll_state.wished_rolls
-                or ctx.roll_message.series in ctx.roll_state.wished_series
-            )
-
             if not should_claim(
                 claim_method,
                 r.roll_message,
                 ctx.preferences,
-                _is_wished,
+                r.is_wished,
                 ctx.minute_reset,
                 ctx.shifthour,
             ):
