@@ -25,7 +25,7 @@ def is_wished(ctx: PrefContext, input_data: dict[str, Any]) -> bool:
 def is_claim_threshold(ctx: PrefContext, input_data: dict[str, Any]) -> bool:
     out = ctx.r.kakera_value >= input_data["claim_threshold"]
     update_log_debug(
-        f"is_claim_threshold: ctx.r.kakera_value={ctx.r.kakera_value} input_data={input_data} ctx.wished={ctx.wished} out={out}"
+        f"is_claim_threshold: ctx. ctx.r.kakera_value={ctx.r.kakera_value} input_data={input_data} ctx.wished={ctx.wished} out={out}"
     )
     return out
 

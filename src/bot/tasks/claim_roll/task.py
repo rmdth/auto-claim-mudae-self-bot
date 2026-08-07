@@ -19,7 +19,6 @@ from src.bot.tasks.shared.domain import OnMessageContext, Preference
 from src.shared.retry import retry
 from src.ui import (
     update_channel_state,
-    update_log_debug,
     update_log_info,
     update_mudae_log_message,
     update_mudae_log_roll,

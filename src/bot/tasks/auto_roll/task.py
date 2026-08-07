@@ -29,7 +29,8 @@ async def auto_roll(ctx: AutoRollContext) -> None:
                 ChannelState.ROLL.value,
                 roll_state.print(),
             )
-            for _ in range(roll_state.curr_rolls):
+            rolls_to_roll = roll_state.curr_rolls
+            for _ in range(rolls_to_roll):
                 await asyncio_sleep(0.5)
                 await discord_channel.send(f"{prefix}{command}")
                 roll_state.curr_rolls -= 1
@@ -39,7 +40,7 @@ async def auto_roll(ctx: AutoRollContext) -> None:
                     roll_state.print(),
                 )
             update_log_info(
-                f"Finished Auto-roll in {discord_channel.name} with {roll_state.curr_rolls} rolls"
+                f"Finished Auto-roll in {discord_channel.name} with {rolls_to_roll} rolls"
             )
             roll_state.curr_rolls = roll_state.max_rolls
         await asyncio_sleep(3600)

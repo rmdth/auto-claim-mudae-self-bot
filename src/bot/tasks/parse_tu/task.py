@@ -1,14 +1,15 @@
 from typing import Any
 
-from src.bot.bot import MUDAE_ID
-from src.bot.shared.domain import ParsedTimeUpdate
+from discord.client import Client
+
+from src.bot.shared.domain import MUDAE_ID, ParsedTimeUpdate
 from src.bot.tasks.parse_tu.logic import get_tu_information, is_tu_message
 from src.shared.retry import retry
 
 
 @retry()
 async def fetch_tu_data(
-    bot: Any, discord_channel: Any, prefix: str
+    bot: Client, discord_channel: Any, prefix: str
 ) -> ParsedTimeUpdate:
 
     await discord_channel.send(f"{prefix}tu")
