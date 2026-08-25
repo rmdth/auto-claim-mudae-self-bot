@@ -19,7 +19,7 @@ def extract_key_amount(description: str) -> int:
     return 0
 
 
-_ROLL_SERIES_PATTERN = re_compile(r"([\s\S]+?)\s(?::\w+:|\*\*\d+\*\*)")
+_ROLL_SERIES_PATTERN = re_compile(r"([\s\S]+?)\s(?::\w+:|\*\*(?:\d+|\d+.\d+)\*\*)")
 _ROLL_KAKERA_PATTERN = re_compile(r"\*\*(.+)\*\*")
 
 
