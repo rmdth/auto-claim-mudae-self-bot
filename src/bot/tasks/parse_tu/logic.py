@@ -19,6 +19,8 @@ def has_current_claim(content: str) -> bool:
 
 def get_time_in(pattern: Pattern, content: str) -> float:
     hours, minutes = pattern.findall(content)[0]
+    if not minutes:
+        return float(hours or 0) * 60 + time()
     return float(hours or 0) * 3600 + float(minutes or 0) * 60 + time()
 
 
