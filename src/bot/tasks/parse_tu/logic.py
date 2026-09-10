@@ -9,8 +9,8 @@ _CURRENT_CLAIM_TIME_PATTERN = re_compile(r",\D+(\d+)?\D+(\d+).+min")
 _DAILY_IN_TU_PATTERN = re_compile(r"\$daily\D+?(\d+)?\D+?(\d+)?\D+?$", flags=MULTILINE)
 
 
-def is_tu_message(content: str) -> bool:
-    return "**=>** $tuarrange" in content
+def is_my_tu_message(user_name: str, content: str) -> bool:
+    return "**=>** $tuarrange" in content and f"**{user_name}**" in content
 
 
 def has_current_claim(content: str) -> bool:
