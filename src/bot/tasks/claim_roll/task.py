@@ -1,4 +1,4 @@
-from asyncio import create_task, sleep, wait
+from asyncio import FIRST_COMPLETED, create_task, sleep, wait
 from re import compile as re_compile
 from time import time as time_time
 from typing import Any
@@ -184,6 +184,18 @@ async def claim_rt(
         discord_channel.id,
         f"⚠️ ---- Claiming rt on {discord_channel.guild.name} ---- ⚠️",
     )
+
+    def already_claimed_check(message):
+        return (
+            message.channel.id == sent_message.channel.id
+            and message.author.id == MUDAE_ID
+            and bool(_RT_CLAIMED_PATTERN.match(message.content))
+        )
+
+    message_task = create_task(
+        bot.wait_for("message", check=already_claimed_check, timeout=3)
+    )
+
     sent_message = await discord_channel.send(f"{prefix}rt")
 
     def check(reaction, user):
@@ -193,28 +205,21 @@ async def claim_rt(
             and str(reaction.emoji) == "✅"
         )
 
-    def already_claimed_check(message):
-        return (
-            message.channel.id == sent_message.channel.id
-            and message.author.id == MUDAE_ID
-            and bool(_RT_CLAIMED_PATTERN.match(message.content))
-        )
-
     reaction_task = create_task(bot.wait_for("reaction_add", check=check, timeout=1.5))
-    message_task = create_task(
-        bot.wait_for("message", check=already_claimed_check, timeout=1.5)
+    completed, remaining = await wait(
+        [reaction_task, message_task], return_when=FIRST_COMPLETED
     )
-    completed, remaining = await wait([reaction_task, message_task])
 
     num_e = 0
     for c in completed:
         if c.exception() is not None:
             num_e += 1
-    if num_e == 2:
-        raise TimeoutError
 
     for c in remaining:
         c.cancel()
+
+    if num_e >= 1:
+        raise TimeoutError
 
     roll_state.reset_in = time_time() + _RT_COOLDOWN
     update_mudae_log_message(
